@@ -33,6 +33,7 @@ header{position:sticky;top:0;z-index:20;background:var(--hd);color:#fff;display:
 .seg button.on{background:#fff;color:var(--hd)}
 .seg .n{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;line-height:18px}
 .me{padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.12);font-size:13px;font-weight:700;white-space:nowrap}
+.clock{font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;color:#dfe6f0;text-align:right;line-height:1.2}
 .icon{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);font-size:17px}
 #banner{display:none;background:var(--warn2);color:#7a4c0d;font-size:12px;padding:6px 14px;text-align:center}
 #banner.show{display:block}
@@ -136,6 +137,7 @@ textarea.in{min-height:56px;resize:vertical}
 .party{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:150;font-size:70px;opacity:0;transition:opacity .3s}
 .party.show{opacity:1}
 /* portrait fallback */
+@media (max-width:1000px){ .brand{display:none} }
 @media (max-width:640px){
  .brand,.prog .pbar,.me{display:none}
  header{gap:6px}
@@ -160,6 +162,7 @@ textarea.in{min-height:56px;resize:vertical}
  </nav>
  <button class="me" id="meBtn">👤 未設定</button>
  <button class="icon" id="setBtn" aria-label="設定">⚙</button>
+ <div class="clock" id="clock"></div>
 </header>
 <div id="banner"></div>
 <main id="list"></main>
@@ -354,9 +357,11 @@ const isSoon = t => !t.done && !isOver(t) && t.date===todayStr() && t.dueAt - Da
 const mineOf = t => !me || t.assignee===me || t.checker===me;
 const prN = p => Math.max(0, PR.indexOf(p||'中'));
 
+const isFutureRepeat = t => !t.done && t.repeat && t.repeat!=='none' && t.date > todayStr();
 function views(){
   const td=todayStr();
-  const open = tasks.filter(t=>!t.done).sort((a,b)=>(a.dueAt-b.dueAt)||(prN(a.priority)-prN(b.priority)));
+  // 繰り返しタスクの次回分は、その日になるまで表示しない（先に完了できないようにする）
+  const open = tasks.filter(t=>!t.done && !isFutureRepeat(t)).sort((a,b)=>(a.dueAt-b.dueAt)||(prN(a.priority)-prN(b.priority)));
   const done = tasks.filter(t=>t.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
   const doneToday = done.filter(t=>t.doneAt && jst(t.doneAt).toISOString().slice(0,10)===td);
   const f = {
@@ -435,6 +440,7 @@ function notifyDone(arr){
 
 /* ---------- 完了・確認 ---------- */
 async function toggleDone(t,row){
+  if(isFutureRepeat(t)){ toast(`この繰り返しタスクは ${dayLabel(t.date)} から対応できます`); return; }
   if(navigator.vibrate) navigator.vibrate(15);
   if(!t.done){
     row && row.classList.add('leaving');
@@ -609,6 +615,11 @@ async function subscribePush(ask){
 }
 $('#sPush').onclick=async()=>{ if(!me){ toast('先に「あなたは誰？」を選んでください'); return; } try{ if(await subscribePush(true)) toast('通知をONにしました'); }catch(e){ console.error(e); toast('通知の登録に失敗：'+e.message); } updatePushUi(); };
 function syncPush(){ if(me && !demo && pushable() && Notification.permission==='granted') subscribePush(false).catch(e=>console.warn(e)); }
+
+/* ---------- 時計 ---------- */
+function tickClock(){ const x=jst(Date.now()), p=n=>String(n).padStart(2,'0');
+  $('#clock').textContent = `${x.getUTCFullYear()}年${p(x.getUTCMonth()+1)}月${p(x.getUTCDate())}日 ${x.getUTCHours()}:${p(x.getUTCMinutes())}`; }
+tickClock(); setInterval(tickClock, 5000);
 
 /* ---------- 共通 ---------- */
 let tt; function toast(s){ const e=$('#toast'); e.textContent=s; e.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>e.classList.remove('show'),2200); }
