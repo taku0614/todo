@@ -17,7 +17,7 @@
 :root{--bg:#f3f5f9;--card:#fff;--ink:#1c2533;--sub:#6b7686;--line:#e4e8ef;--main:#1f6feb;--main2:#e3edff;--ok:#24946a;--ok2:#ddf3e9;--warn:#d9821a;--warn2:#fdf0dc;--bad:#d93a3a;--bad2:#fde4e4;--hd:#1c2533}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+body{overflow-x:hidden;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 input,select,textarea{font:inherit;color:inherit}
 /* header */
@@ -47,7 +47,7 @@ header{position:sticky;top:0;z-index:20;background:var(--hd);color:#fff;display:
 main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));max-width:1100px;margin:0 auto}
 .sec{font-size:12px;font-weight:700;color:var(--sub);margin:12px 4px 6px;display:flex;align-items:center;gap:8px}
 .sec::after{content:"";flex:1;height:1px;background:var(--line)}
-.row{display:grid;grid-template-columns:52px 78px 1fr auto auto;align-items:center;gap:8px;background:var(--card);border-radius:12px;margin-bottom:6px;min-height:58px;padding:4px 10px 4px 0;
+.row{display:grid;grid-template-columns:52px 96px 1fr auto auto;align-items:center;gap:8px;background:var(--card);border-radius:12px;margin-bottom:6px;min-height:58px;padding:4px 10px 4px 0;
  box-shadow:0 1px 2px rgba(0,0,0,.05);border-left:5px solid #c9d1dc;transition:transform .35s,opacity .35s}
 .row.p0{border-left-color:var(--bad)}.row.p1{border-left-color:var(--warn)}.row.p2{border-left-color:#9fb0c4}
 .row.over{background:var(--bad2)}
@@ -61,7 +61,8 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .row.done .ck span{background:var(--ok);border-color:var(--ok)}
 .due{line-height:1.15}
 .due b{font-size:17px;font-variant-numeric:tabular-nums}
-.due small{display:block;font-size:11px;color:var(--sub)}
+.due small{display:block;font-size:11px;color:var(--sub);white-space:nowrap}
+.due small.left{color:var(--main);font-weight:700}
 .row.over .due b,.row.over .due small{color:var(--bad);font-weight:800}
 .ttl{min-width:0}
 .t{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -78,7 +79,7 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .empty b{display:block;font-size:30px;margin-bottom:6px}
 .fab{position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:62px;height:62px;border-radius:50%;background:var(--main);color:#fff;font-size:34px;font-weight:300;box-shadow:0 6px 16px rgba(31,111,235,.4);z-index:15}
 /* sheets */
-.ov{position:fixed;inset:0;background:rgba(15,22,33,.45);z-index:40;display:none;align-items:flex-end;justify-content:center}
+.ov{position:fixed;inset:0;padding-top:env(safe-area-inset-top);background:rgba(15,22,33,.45);z-index:40;display:none;align-items:flex-end;justify-content:center}
 .ov.show{display:flex}
 .panel{background:var(--bg);width:100%;max-width:820px;max-height:100%;height:auto;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden;
  padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
@@ -88,11 +89,12 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .ph .save{padding:9px 20px;border-radius:10px;background:var(--main);color:#fff;font-weight:800}
 .pb{overflow-y:auto;padding:10px 14px calc(16px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
-.f{display:flex;flex-direction:column;gap:5px}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+input[type=date].in,input[type=time].in{-webkit-appearance:none;appearance:none;min-height:46px;text-align:left;display:block}
 .f.full{grid-column:1/-1}
 .f>label{font-size:12px;font-weight:700;color:var(--sub)}
 .f>label em{color:var(--bad);font-style:normal;margin-left:3px}
-.in{width:100%;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-size:16px}
+.in{width:100%;max-width:100%;min-width:0;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-size:16px}
 .in:focus{outline:none;border-color:var(--main)}
 textarea.in{min-height:56px;resize:vertical}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -145,10 +147,16 @@ textarea.in{min-height:56px;resize:vertical}
 /* portrait fallback */
 @media (max-width:1000px){ .brand{display:none} }
 @media (max-width:640px){
- .brand,.prog .pbar,.me{display:none}
- header{gap:6px}
+ .brand,.me{display:none}
+ header{gap:6px 8px;flex-wrap:wrap}
+ .team{max-width:150px}
+ .prog{min-width:0}
+ .pbar{width:50px}
+ .clock{margin-left:auto;font-size:12px}
+ .seg{order:5;width:100%;margin-left:0;justify-content:space-between}
+ .seg button{flex:1}
  .seg button{padding:7px 8px;font-size:12px}
- .row{grid-template-columns:48px 60px 1fr auto;padding-right:8px}
+ .row{grid-template-columns:48px 88px 1fr auto;padding-right:8px}
  .ppl{grid-column:2/-1;grid-row:2;padding-bottom:6px}
  .tags{grid-column:4;grid-row:1}
  .grid,.two{grid-template-columns:1fr}
@@ -186,9 +194,9 @@ textarea.in{min-height:56px;resize:vertical}
    <div class="f"><label>期限日<em>*</em></label>
     <div class="chips" id="eDq"></div>
     <input class="in" type="date" id="eD"></div>
-   <div class="f"><label>警告までの時間<em>*</em>（今から・超過で赤警告）</label>
+   <div class="f"><label>警告までの時間<em>*</em>（今から・過ぎると赤警告）</label>
     <div class="chips" id="eHq"></div>
-    <input class="in" type="time" id="eH"><small style="font-size:11px;color:var(--sub)">↑時刻で直接指定も可</small></div>
+    <div id="eHw"><input class="in" type="time" id="eH"><small style="font-size:11px;color:var(--sub)">↑時刻で直接指定も可</small></div></div>
    <div class="f"><label>優先度</label><div class="chips" id="eP"></div></div>
    <div class="f"><label>繰り返し（完了すると次回分を自動作成）</label><div class="chips" id="eR"></div></div>
    <div class="f full"><label>詳細メモ</label><textarea class="in" id="eM" placeholder="手順・URL・注意点など"></textarea></div>
@@ -376,6 +384,7 @@ const isSoon = t => !t.done && !isOver(t) && t.date===todayStr() && t.dueAt - Da
 const mineOf = t => !me || t.assignee===me || t.checker===me;
 const prN = p => Math.max(0, PR.indexOf(p||'中'));
 
+const relAt = m => { const at=Math.ceil((Date.now()+m*60e3)/(5*60e3))*(5*60e3); const j=jst(at).toISOString(); return {date:j.slice(0,10),time:j.slice(11,16)}; };
 const isFutureRepeat = t => !t.done && t.repeat && t.repeat!=='none' && t.date > todayStr();
 function views(){
   const td=todayStr();
@@ -418,6 +427,14 @@ function render(){
   }
   $('#list').innerHTML = h;
 }
+function dueHtml(t){
+  const td=todayStr(), n=Math.round((new Date(t.date+'T00:00:00Z')-new Date(td+'T00:00:00Z'))/864e5);
+  const [,m,d]=t.date.split('-').map(Number), md=`${m}/${d}(${WD[dow(t.date)]})`, tm=t.noAlert?'終日':t.time;
+  if(n===0) return `<div class="due"><b>${esc(tm)}</b><small>今日</small></div>`;
+  if(t.done) return `<div class="due"><b>${md}</b><small>${esc(tm)}</small></div>`;
+  if(n>0) return `<div class="due"><b>${md}</b><small class="left">あと${n}日・${esc(tm)}</small></div>`;
+  return `<div class="due"><b>${md}</b><small>${-n}日超過</small></div>`;
+}
 function rowHtml(t){
   const cls = ['row','p'+prN(t.priority)];
   if(t.done) cls.push('done'); else if(isOver(t)) cls.push('over'); else if(isSoon(t)) cls.push('soon');
@@ -430,7 +447,7 @@ function rowHtml(t){
   const sub = t.done ? `完了 ${fmtTs(t.doneAt)} ${esc(t.doneBy||'')}` + (t.memo?'・'+esc(t.memo):'') : esc(t.memo||'');
   return `<div class="${cls.join(' ')}" data-id="${esc(t.id)}">
    <button class="ck" data-act="done" aria-label="完了"><span>${t.done?'✓':''}</span></button>
-   <div class="due"><b>${esc(t.time)}</b><small>${dayLabel(t.date)}</small></div>
+   ${dueHtml(t)}
    <div class="ttl" data-act="edit"><div class="t">${esc(t.title)}</div><div class="d">${sub}</div></div>
    <div class="ppl" data-act="edit">${who(t.assignee,'担当')}${who(t.checker,'確認')}</div>
    <div class="tags">${tail}</div></div>`;
@@ -473,7 +490,7 @@ async function toggleDone(t,row){
       const series = t.series || t.id, nid = series+'_'+nd;
       if(nd && !tasks.some(x=>x.id===nid)){
         await store.put(nid,{title:t.title,memo:t.memo||'',assignee:t.assignee,checker:t.checker,priority:t.priority||'中',repeat:t.repeat,series,
-          date:nd,time:t.time,dueAt:dueAtOf(nd,t.time),alertAt:dueAtOf(nd,t.time),done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:'（繰り返し）'});
+          date:nd,time:t.time,noAlert:!!t.noAlert,dueAt:dueAtOf(nd,t.noAlert?'23:59':t.time),alertAt:t.noAlert?FAR:dueAtOf(nd,t.time),done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:'（繰り返し）'});
       }
     }
     const td=todayStr(); const left = tasks.filter(x=>!x.done && x.id!==t.id && x.date<=td).length;
@@ -504,15 +521,21 @@ function drawForm(){
   let fri=td; while(dow(fri)!==5) fri=addDays(fri,1); if(!days.some(d=>d[0]===fri)) days.push([fri,'金曜']);
   chipSet($('#eDq'), days, form.date, v=>{form.date=v;$('#eD').value=v;drawForm();});
   // 経過時間で警告時刻を設定（今から○分後）
-  const rel=[[30,'30分後'],[60,'1時間後'],[120,'2時間後'],[180,'3時間後'],[240,'4時間後']].map(([m,l])=>{ const at=Math.ceil((Date.now()+m*60e3)/(5*60e3))*(5*60e3); const j=jst(at).toISOString(); return [j.slice(0,10)+'|'+j.slice(11,16), l]; });
-  chipSet($('#eHq'), rel, form.date+'|'+form.time, v=>{ const [d,t]=v.split('|'); form.date=d; form.time=t; $('#eD').value=d; $('#eH').value=t; drawForm(); });
+  const rel=[[30,'30分後'],[60,'1時間後'],[180,'3時間後']].map(([m,l])=>{ const j=relAt(m); return [j.date+'|'+j.time, l]; });
+  rel.push(['none','不要']);
+  chipSet($('#eHq'), rel, form.noAlert ? 'none' : form.date+'|'+form.time, v=>{
+    if(v==='none'){ form.noAlert=true; }
+    else { const [d,t]=v.split('|'); form.noAlert=false; form.date=d; form.time=t; $('#eD').value=d; $('#eH').value=t; }
+    drawForm(); });
+  $('#eHw').style.display = form.noAlert ? 'none' : '';
   chipSet($('#eP'), PR.map(p=>[p,p]), form.priority, v=>{form.priority=v;drawForm();}, v=>'pr'+PR.indexOf(v));
   chipSet($('#eR'), Object.entries(RP), form.repeat, v=>{form.repeat=v;drawForm();});
 }
 function openEdit(t){
   editing = t||null;
   const td=todayStr();
-  form = t ? {...t} : {title:'',memo:'',assignee:me||(teamData.members||[])[0]||'',checker:lastChecker||'',...(()=>{ const at=Math.ceil((Date.now()+defMin*60e3)/(5*60e3))*(5*60e3); const j=jst(at).toISOString(); return {date:j.slice(0,10),time:j.slice(11,16)}; })(),priority:'中',repeat:'none'};
+  form = t ? {...t} : {title:'',memo:'',assignee:me||(teamData.members||[])[0]||'',checker:lastChecker||'',...relAt(defMin),noAlert:false,priority:'中',repeat:'none'};
+  if(t && t.noAlert && !form.time) form.time=relAt(60).time;
   $('#eTitle').textContent = t?'タスク編集':'タスク追加';
   $('#eT').value=form.title; $('#eM').value=form.memo||''; $('#eD').value=form.date; $('#eH').value=form.time;
   $('#eDel').style.display = t?'block':'none';
@@ -521,19 +544,20 @@ function openEdit(t){
   if(!t) setTimeout(()=>$('#eT').focus(),250);
 }
 $('#eD').onchange=e=>{form.date=e.target.value;drawForm();};
-$('#eH').onchange=e=>{form.time=e.target.value;drawForm();};
+$('#eH').onchange=e=>{form.time=e.target.value;form.noAlert=false;drawForm();};
 $('#eT').onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#eT').blur(); } };
 $('#eSave').onclick = async ()=>{
   form.title=$('#eT').value.trim(); form.memo=$('#eM').value.trim(); form.date=$('#eD').value; form.time=$('#eH').value;
-  const miss=[]; if(!form.title) miss.push('概要'); if(!form.assignee) miss.push('担当者'); if(!form.checker) miss.push('確認者'); if(!form.date) miss.push('期限日'); if(!form.time) miss.push('期限時刻');
+  const miss=[]; if(!form.title) miss.push('概要'); if(!form.assignee) miss.push('担当者'); if(!form.checker) miss.push('確認者'); if(!form.date) miss.push('期限日'); if(!form.noAlert && !form.time) miss.push('警告までの時間');
   if(miss.length){ toast(miss.join('・')+' を入力してください'); return; }
-  const data={title:form.title,memo:form.memo,assignee:form.assignee,checker:form.checker,date:form.date,time:form.time,dueAt:dueAtOf(form.date,form.time),priority:form.priority,repeat:form.repeat};
+  const na=!!form.noAlert, tm=na?'':form.time;
+  const data={title:form.title,memo:form.memo,assignee:form.assignee,checker:form.checker,date:form.date,time:tm,noAlert:na,dueAt:dueAtOf(form.date,na?'23:59':tm),priority:form.priority,repeat:form.repeat};
   lastChecker=form.checker; LS.set('lastChecker',lastChecker);
   if(editing){
-    if(editing.dueAt!==data.dueAt){ data.lastAlertAt=0; if(!editing.done) data.alertAt=data.dueAt; }
+    if(editing.dueAt!==data.dueAt || !!editing.noAlert!==na){ data.lastAlertAt=0; if(!editing.done) data.alertAt=na?FAR:data.dueAt; }
     await store.put(editing.id,data);
   } else {
-    await store.put(rid(),{...data,alertAt:data.dueAt,done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:me||''});
+    await store.put(rid(),{...data,alertAt:na?FAR:data.dueAt,done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:me||''});
   }
   closeOv(); toast('保存しました');
 };
@@ -549,7 +573,7 @@ function openSettings(force){
   const mem=teamData.members||[];
   chipSet($('#sMe'), mem.map(m=>[m,m]), me, v=>{ me=v; saveMe(); toast(v+' さんで設定しました'); openSettings(); render(); checkAlert(); syncPush(); });
   chipSet($('#sScope'), [['mine','自分が担当・確認のみ'],['all','チーム全員分']], scope, v=>{ scope=v; LS.set('scope',scope); openSettings(); checkAlert(); });
-  chipSet($('#sDef'), [[30,'30分後'],[60,'1時間後'],[120,'2時間後'],[180,'3時間後']].map(([m,l])=>[String(m),l]), String(defMin), v=>{ defMin=+v; LS.set('defMin',defMin); openSettings(); });
+  chipSet($('#sDef'), [[30,'30分後'],[60,'1時間後'],[180,'3時間後']].map(([m,l])=>[String(m),l]), String(defMin), v=>{ defMin=+v; LS.set('defMin',defMin); openSettings(); });
   $('#sMem').innerHTML = mem.map((m,i)=>`<div class="mem"><input class="in" value="${esc(m)}" data-i="${i}" maxlength="12"><button data-rm="${i}">削除</button></div>`).join('') || '<p class="meta">まだメンバーがいません</p>';
   $('#sLink').textContent = inviteUrl();
   $('#sTeam').textContent = `${teamData.name||'(名前なし)'}／招待コード：${team}${demo?'（デモ）':''}`;
@@ -610,7 +634,7 @@ $('#suJoin').onclick=async()=>{
 let snooze = LS.get('snooze',{});
 function alertTargets(){
   const td=todayStr(), now=Date.now();
-  return tasks.filter(t=>!t.done && t.date===td && t.dueAt<=now && (scope==='all' || mineOf(t)) && !((snooze[t.id]||0)>now));
+  return tasks.filter(t=>!t.done && !t.noAlert && t.date===td && t.dueAt<=now && (scope==='all' || mineOf(t)) && !((snooze[t.id]||0)>now));
 }
 let alertShown=false;
 function checkAlert(){
