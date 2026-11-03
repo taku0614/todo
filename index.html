@@ -60,7 +60,8 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .tag.w{background:#d7f3e5;color:#16784f;font-weight:700}
 .tag.y{background:#fff1a8;color:#7a5d00;font-weight:700}
 .xv{width:34px;height:34px;border-radius:9px;background:#eef1f6;color:var(--sub);font-size:15px;font-weight:900;transition:transform .25s;flex:none}
-.xe{width:34px;height:34px;border-radius:9px;background:#eef1f6;font-size:15px;flex:none}
+.xe{height:34px;padding:0 10px;border-radius:9px;background:#eef1f6;color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap}
+.acts .xv{width:auto}
 .row.xo .xv{transform:rotate(180deg);background:var(--main2);color:var(--main)}
 .xp{grid-column:1/-1;display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
 .row.xo .xp{grid-template-rows:1fr}
@@ -90,11 +91,13 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .ttl{min-width:0}
 .t{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .d{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ppl{display:flex;gap:5px;flex-wrap:nowrap}
+.ppl{display:flex;gap:5px;flex-wrap:nowrap;align-items:center}
 .who{font-size:12px;padding:4px 8px;border-radius:7px;background:#eef1f6;white-space:nowrap}
 .who i{font-style:normal;color:var(--sub);font-size:10px;margin-right:3px}
 .who.mine{background:var(--main2);color:#1a4fae;font-weight:700}
-.tags{display:flex;gap:4px;align-items:center;justify-content:flex-end;min-width:30px}
+.tags{display:flex;gap:4px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.tags:empty{display:none}
+.acts{display:flex;flex-direction:column;gap:5px;align-items:stretch}
 .tag{font-size:11px;padding:3px 6px;border-radius:6px;background:#eef1f6;color:var(--sub);white-space:nowrap}
 .cfm{font-size:12px;font-weight:700;padding:7px 10px;border-radius:8px;background:var(--main);color:#fff;white-space:nowrap}
 .okd{font-size:11px;color:var(--ok);font-weight:700;white-space:nowrap}
@@ -151,7 +154,7 @@ textarea.in{min-height:56px;resize:vertical}
  padding:calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))}
 #alert.show{display:flex}
 @keyframes pulse{0%,100%{background:#c41d1d}50%{background:#ff2b2b}}
-#alert .ah{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+#alert .ah{display:flex;align-items:baseline;gap:4px 12px;margin-bottom:8px;flex-wrap:wrap}
 #alert .ah b{font-size:26px;font-weight:900}
 #alert .ah small{font-size:13px;opacity:.9}
 #alert .al{flex:1;overflow:auto}
@@ -168,6 +171,17 @@ textarea.in{min-height:56px;resize:vertical}
 .party{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:150;font-size:70px;opacity:0;transition:opacity .3s}
 .party.show{opacity:1}
 /* portrait fallback */
+/* PC（横幅が広く、マウス操作）：詳細を最初から右側に表示 */
+@media (min-width:1100px) and (hover:hover){
+ main{max-width:1500px}
+ .row{grid-template-columns:52px 96px minmax(200px,1fr) auto auto minmax(340px,38%);align-items:center}
+ .xp{grid-column:6;grid-row:1;grid-template-rows:1fr;align-self:stretch;padding:4px 0}
+ .xin{margin:0;padding:6px 10px;font-size:12px;line-height:1.5;height:100%}
+ .xin .memo{font-size:12px;margin-bottom:3px;max-height:3em;overflow:hidden}
+ .xin dl{grid-template-columns:auto 1fr auto 1fr;gap:0 8px}
+ .acts .xv{display:none}
+ .ttl .d{display:none}
+}
 @media (max-width:1000px){ .brand{display:none} }
 @media (max-width:640px){
  .brand,.me{display:none}
@@ -179,9 +193,19 @@ textarea.in{min-height:56px;resize:vertical}
  .seg{order:5;width:100%;margin-left:0;justify-content:space-between}
  .seg button{flex:1}
  .seg button{padding:7px 8px;font-size:12px}
- .row{grid-template-columns:48px 88px 1fr auto;padding-right:8px}
- .ppl{grid-column:2/-1;grid-row:2;padding-bottom:6px}
- .tags{grid-column:4;grid-row:1}
+ .row{grid-template-columns:48px 76px 1fr 54px;padding:6px 8px 6px 0;align-items:start;row-gap:6px}
+ .ck{height:44px;width:48px}
+ .due{padding-top:4px}
+ .ttl{padding-top:3px}
+ .t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35}
+ .ppl{grid-column:2/4;grid-row:2;flex-wrap:wrap;gap:4px}
+ .acts{grid-column:4;grid-row:1/span 2}
+ .xp{grid-row:3}
+ #alert .ah b{font-size:22px}
+ .ai{flex-wrap:wrap}
+ .ai .tx{flex-basis:calc(100% - 90px)}
+ .ai button{width:100%}
+ .xin{margin-left:6px}
  .grid,.two{grid-template-columns:1fr}
 }
 @media (max-height:440px){ .ov{align-items:stretch} .panel{border-radius:0;height:100%} }
@@ -490,9 +514,9 @@ function rowHtml(t){
   return `<div class="${cls.join(' ')}" data-id="${esc(t.id)}">
    <button class="ck" data-act="done" aria-label="完了"><span>${t.done?'✓':''}</span></button>
    ${dueHtml(t)}
-   <div class="ttl" data-act="edit"><div class="t">${esc(t.title)}</div><div class="d">${sub}</div></div>
-   <div class="ppl" data-act="edit">${who(t.assignee,'担当')}${who(t.checker,'確認')}</div>
-   <div class="tags">${tail}<button class="xe" data-act="edit" aria-label="編集">✏️</button><button class="xv" data-act="xp" aria-label="詳細">⌄</button></div>
+   <div class="ttl"><div class="t">${esc(t.title)}</div><div class="d">${sub}</div></div>
+   <div class="ppl">${who(t.assignee,'担当')}${who(t.checker,'確認')}${tail}</div>
+   <div class="acts"><button class="xe" data-act="edit">編集</button><button class="xv" data-act="xp" aria-label="詳細">⌄</button></div>
    <div class="xp"><div>${detailHtml(t)}</div></div></div>`;
 }
 const linkify = s => esc(s).replace(/https?:\/\/[^\s<]+/g, u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
@@ -518,7 +542,8 @@ $('#list').addEventListener('click', e=>{
   if(a && a.dataset.act==='xp'){ const id=row.dataset.id; if(openRows.has(id)) openRows.delete(id); else openRows.add(id); row.classList.toggle('xo'); return; }
   if(e.target.closest('.xin') && !a) return;
   const t=tasks.find(x=>x.id===row.dataset.id); if(!t) return;
-  const act = a ? a.dataset.act : 'edit';
+  if(!a) return; // 行を押しただけでは何もしない（編集は「編集」ボタンから）
+  const act = a.dataset.act;
   if(act==='done') toggleDone(t,row);
   else if(act==='confirm') confirmTask(t);
   else openEdit(t);
