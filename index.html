@@ -176,9 +176,9 @@ textarea.in{min-height:56px;resize:vertical}
    <div class="f"><label>期限日<em>*</em></label>
     <div class="chips" id="eDq"></div>
     <input class="in" type="date" id="eD"></div>
-   <div class="f"><label>期限時刻<em>*</em>（超過で赤警告）</label>
+   <div class="f"><label>警告までの時間<em>*</em>（今から・超過で赤警告）</label>
     <div class="chips" id="eHq"></div>
-    <input class="in" type="time" id="eH"></div>
+    <input class="in" type="time" id="eH"><small style="font-size:11px;color:var(--sub)">↑時刻で直接指定も可</small></div>
    <div class="f"><label>優先度</label><div class="chips" id="eP"></div></div>
    <div class="f"><label>繰り返し（完了すると次回分を自動作成）</label><div class="chips" id="eR"></div></div>
    <div class="f full"><label>詳細メモ</label><textarea class="in" id="eM" placeholder="手順・URL・注意点など"></textarea></div>
@@ -198,7 +198,7 @@ textarea.in{min-height:56px;resize:vertical}
     <p id="sPushTxt">アプリを閉じていても、担当・確認タスクが期限を過ぎると通知します。</p>
     <div style="margin-top:8px"><button class="btn" id="sPush">この端末で通知を受け取る</button></div></div>
    <div class="card"><h4>赤画面警告の対象</h4><div class="chips" id="sScope"></div></div>
-   <div class="card"><h4>新規タスクの既定時刻</h4><input class="in" type="time" id="sDef" style="max-width:160px"></div>
+   <div class="card"><h4>新規タスクの警告までの時間（初期値）</h4><div class="chips" id="sDef"></div></div>
   </div>
   <div>
    <div class="card"><h4>🔗 メンバーを招待</h4><p>このリンクを送ると同じリストに参加できます。</p>
@@ -217,8 +217,8 @@ textarea.in{min-height:56px;resize:vertical}
  <p class="lead" id="suLead">チームを作るか、招待リンクで参加してください。</p>
  <div class="two">
   <div class="card"><h4>新しくチームを作る</h4>
-   <div class="f" style="margin-bottom:8px"><label>チーム名</label><input class="in" id="suName" placeholder="例）物流企画チーム"></div>
-   <div class="f" style="margin-bottom:10px"><label>メンバー（「、」区切り・自分も含む）</label><input class="in" id="suMem" placeholder="例）山田、佐藤、鈴木、田中、高橋"></div>
+   <div class="f" style="margin-bottom:8px"><label>チーム名</label><input class="in" id="suName" placeholder="例）〇〇チーム"></div>
+   <div class="f" style="margin-bottom:10px"><label>メンバー（「、」区切り・自分も含む）</label><input class="in" id="suMem" placeholder="例）〇〇、△△、□□"></div>
    <button class="btn" id="suMake">作成する</button></div>
   <div class="card"><h4>招待されたので参加する</h4>
    <div class="f" style="margin-bottom:10px"><label>招待リンク または 招待コード</label><input class="in" id="suCode" placeholder="https://… または コード"></div>
@@ -272,7 +272,7 @@ let team = LS.get('team', null);
 let me = LS.get('me', '');
 let filter = LS.get('filter', 'today');
 let scope = LS.get('scope', 'mine');
-let defTime = LS.get('defTime', '17:00');
+let defMin = LS.get('defMin', 60);
 let lastChecker = LS.get('lastChecker', '');
 let teamData = null;
 let tasks = [];
@@ -310,7 +310,7 @@ async function loadFirebase(){
   try{ db = F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})}); }
   catch(e){ db = F.getFirestore(app); }
   const auth = U.getAuth(app);
-  await new Promise(res=>{ const off=U.onAuthStateChanged(auth,u=>{ if(u){off();res();} }); U.signInAnonymously(auth).catch(e=>{ console.warn(e); res(); }); setTimeout(res,6000); });
+  await new Promise(res=>{ const off=U.onAuthStateChanged(auth,u=>{ if(u){off();res();} }); U.signInAnonymously(auth).catch(e=>{ console.warn(e); showBanner(e.code==='auth/admin-restricted-operation'||e.code==='auth/operation-not-allowed' ? 'Firebaseの「Authentication → 匿名」が無効です。有効にしてください' : 'ログイン失敗：'+(e.code||e.message)); res(); }); setTimeout(res,6000); });
   FB = {F,db}; return FB;
 }
 async function fbStore(teamId){
@@ -464,14 +464,16 @@ function drawForm(){
   const td=todayStr(); const days=[[td,'今日'],[addDays(td,1),'明日'],[addDays(td,2),dayLabel(addDays(td,2))]];
   let fri=td; while(dow(fri)!==5) fri=addDays(fri,1); if(!days.some(d=>d[0]===fri)) days.push([fri,'金曜']);
   chipSet($('#eDq'), days, form.date, v=>{form.date=v;$('#eD').value=v;drawForm();});
-  chipSet($('#eHq'), ['09:00','12:00','15:00','17:00','18:00'].map(x=>[x,x]), form.time, v=>{form.time=v;$('#eH').value=v;drawForm();});
+  // 経過時間で警告時刻を設定（今から○分後）
+  const rel=[[30,'30分後'],[60,'1時間後'],[120,'2時間後'],[180,'3時間後'],[240,'4時間後']].map(([m,l])=>{ const at=Math.ceil((Date.now()+m*60e3)/(5*60e3))*(5*60e3); const j=jst(at).toISOString(); return [j.slice(0,10)+'|'+j.slice(11,16), l]; });
+  chipSet($('#eHq'), rel, form.date+'|'+form.time, v=>{ const [d,t]=v.split('|'); form.date=d; form.time=t; $('#eD').value=d; $('#eH').value=t; drawForm(); });
   chipSet($('#eP'), PR.map(p=>[p,p]), form.priority, v=>{form.priority=v;drawForm();}, v=>'pr'+PR.indexOf(v));
   chipSet($('#eR'), Object.entries(RP), form.repeat, v=>{form.repeat=v;drawForm();});
 }
 function openEdit(t){
   editing = t||null;
   const td=todayStr();
-  form = t ? {...t} : {title:'',memo:'',assignee:me||(teamData.members||[])[0]||'',checker:lastChecker||'',date:td,time:defTime,priority:'中',repeat:'none'};
+  form = t ? {...t} : {title:'',memo:'',assignee:me||(teamData.members||[])[0]||'',checker:lastChecker||'',...(()=>{ const at=Math.ceil((Date.now()+defMin*60e3)/(5*60e3))*(5*60e3); const j=jst(at).toISOString(); return {date:j.slice(0,10),time:j.slice(11,16)}; })(),priority:'中',repeat:'none'};
   $('#eTitle').textContent = t?'タスク編集':'タスク追加';
   $('#eT').value=form.title; $('#eM').value=form.memo||''; $('#eD').value=form.date; $('#eH').value=form.time;
   $('#eDel').style.display = t?'block':'none';
@@ -506,9 +508,9 @@ function inviteUrl(){ return location.origin+location.pathname+'?t='+team; }
 function openSettings(force){
   if(!teamData) return;
   const mem=teamData.members||[];
-  chipSet($('#sMe'), mem.map(m=>[m,m]), me, v=>{ me=v; LS.set('me',me); openSettings(); render(); checkAlert(); syncPush(); });
+  chipSet($('#sMe'), mem.map(m=>[m,m]), me, v=>{ me=v; LS.set('me',me); toast(v+' さんで設定しました'); openSettings(); render(); checkAlert(); syncPush(); });
   chipSet($('#sScope'), [['mine','自分が担当・確認のみ'],['all','チーム全員分']], scope, v=>{ scope=v; LS.set('scope',scope); openSettings(); checkAlert(); });
-  $('#sDef').value=defTime;
+  chipSet($('#sDef'), [[30,'30分後'],[60,'1時間後'],[120,'2時間後'],[180,'3時間後']].map(([m,l])=>[String(m),l]), String(defMin), v=>{ defMin=+v; LS.set('defMin',defMin); openSettings(); });
   $('#sMem').innerHTML = mem.map((m,i)=>`<div class="mem"><input class="in" value="${esc(m)}" data-i="${i}" maxlength="12"><button data-rm="${i}">削除</button></div>`).join('') || '<p class="meta">まだメンバーがいません</p>';
   $('#sLink').textContent = inviteUrl();
   $('#sTeam').textContent = `${teamData.name||'(名前なし)'}／招待コード：${team}${demo?'（デモ）':''}`;
@@ -516,7 +518,6 @@ function openSettings(force){
   $('#sett').classList.add('show');
   if(force===true) toast('最初に「あなたは誰？」を選んでください');
 }
-$('#sDef').onchange=e=>{ defTime=e.target.value||'17:00'; LS.set('defTime',defTime); };
 $('#sMem').addEventListener('change', e=>{ const i=e.target.dataset.i; if(i==null) return; const v=e.target.value.trim(); if(!v) return; const mem=[...teamData.members]; const old=mem[i]; mem[i]=v; store.setTeam({members:mem}); if(me===old){me=v;LS.set('me',me);} });
 $('#sMem').addEventListener('click', e=>{ const i=e.target.dataset.rm; if(i==null) return; const mem=[...teamData.members]; if(!confirm(`${mem[i]} さんをメンバーから外しますか？（タスクは残ります）`)) return; mem.splice(i,1); store.setTeam({members:mem}).then(()=>openSettings()); });
 $('#sAdd').onclick=()=>{ const v=$('#sNew').value.trim(); if(!v) return; const mem=[...(teamData.members||[])]; if(mem.includes(v)){toast('同じ名前がいます');return;} mem.push(v); $('#sNew').value=''; store.setTeam({members:mem}).then(()=>openSettings()); };
