@@ -60,6 +60,7 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .tag.w{background:#d7f3e5;color:#16784f;font-weight:700}
 .tag.y{background:#fff1a8;color:#7a5d00;font-weight:700}
 .xv{width:34px;height:34px;border-radius:9px;background:#eef1f6;color:var(--sub);font-size:15px;font-weight:900;transition:transform .25s;flex:none}
+.xe{width:34px;height:34px;border-radius:9px;background:#eef1f6;font-size:15px;flex:none}
 .row.xo .xv{transform:rotate(180deg);background:var(--main2);color:var(--main)}
 .xp{grid-column:1/-1;display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
 .row.xo .xp{grid-template-rows:1fr}
@@ -491,7 +492,7 @@ function rowHtml(t){
    ${dueHtml(t)}
    <div class="ttl" data-act="edit"><div class="t">${esc(t.title)}</div><div class="d">${sub}</div></div>
    <div class="ppl" data-act="edit">${who(t.assignee,'担当')}${who(t.checker,'確認')}</div>
-   <div class="tags">${tail}<button class="xv" data-act="xp" aria-label="詳細">⌄</button></div>
+   <div class="tags">${tail}<button class="xe" data-act="edit" aria-label="編集">✏️</button><button class="xv" data-act="xp" aria-label="詳細">⌄</button></div>
    <div class="xp"><div>${detailHtml(t)}</div></div></div>`;
 }
 const linkify = s => esc(s).replace(/https?:\/\/[^\s<]+/g, u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
@@ -508,7 +509,7 @@ function detailHtml(t){
   if(t.alertCount) rows.push(['超過通知', t.alertCount+'回']);
   return `<div class="xin">${t.memo?`<div class="memo">${linkify(t.memo)}</div>`:'<div class="memo" style="color:var(--sub)">（詳細メモなし）</div>'}
    <dl>${rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>
-   <button class="eb" data-act="edit">✏️ 編集する</button></div>`;
+</div>`;
 }
 $('#list').addEventListener('click', e=>{
   const cs=e.target.closest('[data-cs]'); if(cs){ checkScope=cs.dataset.cs; LS.set('checkScope',checkScope); render(); return; }
