@@ -92,7 +92,7 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .ppl{display:flex;gap:5px;flex-wrap:nowrap}
 .who{font-size:12px;padding:4px 8px;border-radius:7px;background:#eef1f6;white-space:nowrap}
 .who i{font-style:normal;color:var(--sub);font-size:10px;margin-right:3px}
-.who.me{background:var(--main2);color:#1a4fae;font-weight:700}
+.who.mine{background:var(--main2);color:#1a4fae;font-weight:700}
 .tags{display:flex;gap:4px;align-items:center;justify-content:flex-end;min-width:30px}
 .tag{font-size:11px;padding:3px 6px;border-radius:6px;background:#eef1f6;color:var(--sub);white-space:nowrap}
 .cfm{font-size:12px;font-weight:700;padding:7px 10px;border-radius:8px;background:var(--main);color:#fff;white-space:nowrap}
@@ -477,7 +477,7 @@ function rowHtml(t){
   if(t.done){ cls.push('done'); if(!t.checked) cls.push('wait'); }
   else if(isOver(t)) cls.push('over'); else if(isSoon(t)) cls.push('soon'); else if(isPreset(t)) cls.push('mild');
   if(openRows.has(t.id)) cls.push('xo');
-  const who = (n,l) => `<span class="who ${n===me?'me':''}"><i>${l}</i>${esc(n)}</span>`;
+  const who = (n,l) => `<span class="who ${n===me?'mine':''}"><i>${l}</i>${esc(n)}</span>`;
   let tail = '';
   if(isPreset(t)) tail += `<span class="tag y">本日期限</span>`;
   if(t.repeat && t.repeat!=='none') tail += `<span class="tag">🔁${RP[t.repeat]}</span>`;
