@@ -1,0 +1,38 @@
+name: 期限超過アラート
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # 5分ごと（GitHubの混雑で数分遅れることがあります）
+  workflow_dispatch:        # 手動実行（テスト用）
+permissions:
+  contents: write
+concurrency:
+  group: alert
+  cancel-in-progress: false
+jobs:
+  alert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: install
+        run: npm install --prefix scripts --no-audit --no-fund
+      - name: send
+        run: node scripts/alert.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VAPID_PUBLIC: ${{ secrets.VAPID_PUBLIC }}
+          VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
+          REALERT_MIN: '30'
+      # GitHubは60日間更新のないリポジトリの定期実行を止めるため、毎月1日に空コミットして延命
+      - name: keepalive
+        if: github.event_name == 'schedule'
+        run: |
+          if [ "$(date -u +%d%H)" = "0100" ] && [ "$(date -u +%M)" -lt 5 ]; then
+            git config user.name "keepalive-bot"
+            git config user.email "keepalive@users.noreply.github.com"
+            git commit --allow-empty -m "keepalive"
+            git push
+          fi

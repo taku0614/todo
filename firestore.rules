@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // チーム情報：招待コード（20文字）を知っている人だけ読み書き可。一覧取得は不可。
+    match /teams/{teamId} {
+      allow get, write: if request.auth != null && teamId.size() >= 16;
+      // タスク・通知登録
+      match /{sub}/{docId} {
+        allow read, write: if request.auth != null && teamId.size() >= 16;
+      }
+    }
+  }
+}

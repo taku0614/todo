@@ -1,0 +1,50 @@
+// 期限超過タスクのプッシュ通知（GitHub Actions から5分ごとに実行）
+// 当日期限・未完了・期限時刻を過ぎたタスクを、担当者と確認者の端末に通知する。
+// 完了するまで REALERT_MIN 分（既定30分）ごとに再通知する。
+import admin from 'firebase-admin';
+import webpush from 'web-push';
+
+const env = k => { const v = process.env[k]; if (!v) { console.error(`Secret ${k} が未設定です`); process.exit(1); } return v; };
+admin.initializeApp({ credential: admin.credential.cert(JSON.parse(env('FIREBASE_SERVICE_ACCOUNT'))) });
+webpush.setVapidDetails('mailto:' + (process.env.VAPID_SUBJECT || 'todo@example.com'), env('VAPID_PUBLIC'), env('VAPID_PRIVATE'));
+const db = admin.firestore();
+
+const now = Date.now();
+const today = new Date(now + 9 * 3600e3).toISOString().slice(0, 10); // 日本時間の今日
+const INTERVAL = (Number(process.env.REALERT_MIN) || 30) * 60e3;
+
+let sent = 0;
+const teams = await db.collection('teams').listDocuments();
+for (const tref of teams) {
+  const snap = await tref.collection('tasks').where('done', '==', false).get();
+  const due = snap.docs.filter(d => {
+    const t = d.data();
+    return t.date === today && t.dueAt <= now && (!t.lastAlertAt || now - t.lastAlertAt >= INTERVAL - 60e3);
+  });
+  if (!due.length) continue;
+  const subs = (await tref.collection('subs').get()).docs;
+  const overdueBy = name => snap.docs.filter(d => { const t = d.data(); return t.date === today && t.dueAt <= now && (t.assignee === name || t.checker === name); }).length;
+
+  for (const d of due) {
+    const t = d.data();
+    let targets = subs.filter(s => [t.assignee, t.checker].includes(s.data().member));
+    if (!targets.length) targets = subs; // 担当・確認者が通知未登録ならチーム全員へ
+    const late = Math.round((now - t.dueAt) / 60e3);
+    await Promise.all(targets.map(s => {
+      const sd = s.data();
+      const payload = JSON.stringify({
+        title: `⚠ 期限超過：${t.title}`,
+        body: `${t.time}期限（${late}分超過）／担当 ${t.assignee}・確認 ${t.checker}`,
+        tag: 'task-' + d.id, url: './?alert=1', count: overdueBy(sd.member)
+      });
+      return webpush.sendNotification({ endpoint: sd.endpoint, keys: sd.keys }, payload, { TTL: 3600, urgency: 'high' })
+        .then(() => { sent++; })
+        .catch(e => {
+          if (e.statusCode === 404 || e.statusCode === 410) return s.ref.delete(); // 無効になった端末は削除
+          console.error('push失敗', e.statusCode, e.body);
+        });
+    }));
+    await d.ref.update({ lastAlertAt: now, alertCount: admin.firestore.FieldValue.increment(1) });
+  }
+}
+console.log(`${today} 通知送信 ${sent} 件`);
