@@ -30,3 +30,10 @@ self.addEventListener('notificationclick', e => {
     await self.clients.openWindow(url);
   })());
 });
+
+// 更新がすぐ反映されるよう、アプリのファイルは毎回サーバーに最新か確認する（電波がない時は保存済みの版を使う）
+self.addEventListener('fetch', e => {
+  const u = new URL(e.request.url);
+  if (e.request.method !== 'GET' || u.origin !== self.location.origin) return;
+  e.respondWith(fetch(e.request, { cache: 'no-cache' }).catch(() => caches.match(e.request)));
+});
