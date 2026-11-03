@@ -492,7 +492,7 @@ function render(){
 function dueHtml(t){
   const td=todayStr(), n=Math.round((new Date(t.date+'T00:00:00Z')-new Date(td+'T00:00:00Z'))/864e5);
   const [,m,d]=t.date.split('-').map(Number), md=`${m}/${d}(${WD[dow(t.date)]})`, tm=t.noAlert?'終日':t.time;
-  if(n===0) return `<div class="due"><b>${esc(tm)}</b><small>今日</small></div>`;
+  if(n===0) return t.noAlert ? `<div class="due"><b>今日</b><small>終日</small></div>` : `<div class="due"><b>${esc(tm)}</b><small>今日</small></div>`;
   if(t.done) return `<div class="due"><b>${md}</b><small>${esc(tm)}</small></div>`;
   if(n>0) return `<div class="due"><b>${md}</b><small class="left">あと${n}日・${esc(tm)}</small></div>`;
   return `<div class="due"><b>${md}</b><small>${-n}日超過</small></div>`;
