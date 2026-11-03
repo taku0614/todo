@@ -78,7 +78,7 @@ footer{text-align:center;font-size:12px;color:var(--sub);margin-top:30px}
  <p>はじめての方向け・5分で使えるようになります</p>
 </div>
 <nav class="toc">
- <a href="#s1">①入れる</a><a href="#s2">②参加</a><a href="#s3">③通知ON</a><a href="#s4">④画面の見方</a><a href="#s5">⑤追加</a><a href="#s6">⑥完了</a><a href="#s7">⑦赤い警告</a><a href="#s8">⑧確認</a><a href="#s9">⑨招待・切替</a><a href="#faq">困ったら</a>
+ <a href="#s1">①入れる</a><a href="#s2">②参加</a><a href="#s3">③通知ON</a><a href="#s4">④画面の見方</a><a href="#s5">⑤追加</a><a href="#s6">⑥完了</a><a href="#s7">⑦警告</a><a href="#s8">⑧確認</a><a href="#s9">⑨招待・切替</a><a href="#faq">困ったら</a>
 </nav>
 <main>
 
@@ -148,7 +148,7 @@ footer{text-align:center;font-size:12px;color:var(--sub);margin-top:30px}
   <img class="shot p" src="manual/list-p.jpg" alt="一覧（縦）">
   <ol class="k">
    <li><b class="m">1</b><span>今のチーム名（押すと切り替え）</span></li>
-   <li><b class="m">2</b><span>表示の切り替え：<b>今日</b>／<b>自分</b>（自分の担当・確認）／<b>確認待ち</b>／<b>すべて</b>　赤い数字は要対応の件数</span></li>
+   <li><b class="m">2</b><span>表示の切り替え：<b>すべて</b>／<b>今日</b>／<b>自分</b>（自分の担当・確認）／<b>確認待ち</b>　赤い数字は要対応の件数</span></li>
    <li><b class="m">3</b><span>タスクを追加</span></li>
   </ol>
  </div>
@@ -157,10 +157,13 @@ footer{text-align:center;font-size:12px;color:var(--sub);margin-top:30px}
   <img class="shot" src="manual/list-l.jpg" alt="一覧（横）">
   <ol class="k">
    <li><b class="m">1</b><span>チェック欄（押すと完了）</span></li>
-   <li><b class="m">2</b><span>期限　<span style="background:#fde4e4;padding:0 4px;border-radius:4px">赤</span>＝期限切れ　<span style="background:#fdf0dc;padding:0 4px;border-radius:4px">オレンジ</span>＝1時間以内</span></li>
+   <li><b class="m">2</b><span>期限　<span style="background:#fde4e4;padding:0 4px;border-radius:4px">赤</span>＝期限切れ　<span style="background:#fdf0dc;padding:0 4px;border-radius:4px">オレンジ</span>＝1時間以内　<span style="background:#fffbe0;padding:0 4px;border-radius:4px">黄色</span>＝前もって登録した「今日が期限」</span></li>
    <li><b class="m">3</b><span>担当者と確認者（自分は青色）</span></li>
   </ol>
   <img class="shot" style="margin-top:12px" src="manual/future.jpg" alt="先の予定">
+  <p style="font-size:14px;margin-top:8px">右端の <b style="display:inline-flex;width:24px;height:24px;border-radius:7px;background:#eef1f6;align-items:center;justify-content:center">⌄</b> を押すと、下に詳細が開きます。</p>
+  <img class="shot" style="margin-top:10px" src="manual/detail.jpg" alt="詳細の展開">
+  <ol class="k"><li><b class="m">1</b><span>⌄ を押すと開く／もう一度押すと閉じる</span></li><li><b class="m">2</b><span>メモ・期限・作成者などの詳細（URLは押すと開けます）。「編集する」で変更</span></li></ol>
   <p style="font-size:14px;margin-top:8px"><b class="m" style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;align-items:center;justify-content:center">1</b> 今日以外のタスクは <b>日付</b> と <b style="color:var(--main)">あと○日</b> で表示されます。</p>
  </div>
 </section>
@@ -176,7 +179,7 @@ footer{text-align:center;font-size:12px;color:var(--sub);margin-top:30px}
    <li><b class="m">2</b><span>担当者（やる人）</span></li>
    <li><b class="m">3</b><span>確認者（チェックする人）</span></li>
    <li><b class="m">4</b><span>期限日</span></li>
-   <li><b class="m">5</b><span>警告までの時間：<b>30分後／1時間後／3時間後</b>に赤い警告。警告がいらなければ<b>「不要」</b></span></li>
+   <li><b class="m">5</b><span>警告までの時間：<b>30分後／1時間後／3時間後</b>に赤い警告。警告がいらなければ<b>「不要」</b><br>※明日以降の日付を選ぶと<b>9:00／12:00／15:00／17:00</b>の時刻選択に変わります</span></li>
    <li><b class="m">6</b><span>最後に「保存」</span></li>
   </ol>
  </div>
@@ -202,7 +205,12 @@ footer{text-align:center;font-size:12px;color:var(--sub);margin-top:30px}
 
 <!-- 7 -->
 <section id="s7">
- <h2><span class="n">7</span>赤い警告が出たら</h2>
+ <h2><span class="n">7</span>黄色のお知らせ・赤い警告</h2>
+ <div class="card">
+  <p class="lead">前もって登録したタスクは、<b>期限の日</b>になると黄色でお知らせします（朝8時に通知、アプリを開いた時にも表示）。</p>
+  <img class="shot" src="manual/mild.jpg" alt="黄色のお知らせ">
+  <p class="cap" style="margin-top:6px">確認したら <b>「OK」</b></p>
+ </div>
  <div class="card">
   <p class="lead">警告の時間を過ぎると…</p>
   <div class="lock"><div class="t">10:06</div>
@@ -226,8 +234,9 @@ footer{text-align:center;font-size:12px;color:var(--sub);margin-top:30px}
   <div class="noti"><img src="icon-192.png" alt=""><div><b>✅ 確認依頼：在庫差異の報告</b>宮川さんが完了しました。確認をお願いします</div></div>
   <img class="shot" style="margin-top:14px" src="manual/check.jpg" alt="確認待ち">
   <ol class="k">
-   <li><b class="m">1</b><span>「確認待ち」タブを開く</span></li>
-   <li><b class="m">2</b><span>内容を確かめて「確認OK」</span></li>
+   <li><b class="m">1</b><span>「確認待ち」タブを開く（確認待ちは<b style="color:var(--ok)">緑色</b>で表示）</span></li>
+   <li><b class="m">2</b><span>「自分が確認者」／「すべて」（チーム全員分）を切り替え</span></li>
+   <li><b class="m">3</b><span>内容を確かめて「確認OK」</span></li>
   </ol>
  </div>
 </section>
