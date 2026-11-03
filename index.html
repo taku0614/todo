@@ -54,6 +54,28 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .row.soon{background:var(--warn2)}
 .row.leaving{transform:translateY(30px);opacity:0}
 .row.done{opacity:.62;border-left-color:var(--ok)}
+.row.done.wait{opacity:1;background:#eaf8f1;border-left-color:var(--ok)}
+.row.done.wait .t{text-decoration:none;color:var(--ink)}
+.row.mild{background:#fffbe0}
+.tag.w{background:#d7f3e5;color:#16784f;font-weight:700}
+.tag.y{background:#fff1a8;color:#7a5d00;font-weight:700}
+.xv{width:34px;height:34px;border-radius:9px;background:#eef1f6;color:var(--sub);font-size:15px;font-weight:900;transition:transform .25s;flex:none}
+.row.xo .xv{transform:rotate(180deg);background:var(--main2);color:var(--main)}
+.xp{grid-column:1/-1;display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
+.row.xo .xp{grid-template-rows:1fr}
+.xp>div{overflow:hidden}
+.xin{margin:2px 0 8px 14px;padding:10px 12px;background:rgba(255,255,255,.75);border:1px solid var(--line);border-radius:10px;font-size:13px;line-height:1.7}
+.xin .memo{white-space:pre-wrap;word-break:break-all;margin-bottom:6px;font-size:14px}
+.xin .memo a{color:var(--main)}
+.xin dl{display:grid;grid-template-columns:auto 1fr;gap:0 12px}
+.xin dt{color:var(--sub)}
+.xin .eb{margin-top:8px;padding:8px 16px;border-radius:9px;background:var(--main);color:#fff;font-weight:700;font-size:13px}
+.sub{display:flex;gap:4px;background:#e6eaf0;border-radius:10px;padding:3px;margin:10px 4px 0;width:max-content}
+.sub button{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;color:var(--sub)}
+.sub button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+#mild .card{max-width:520px;margin:auto;width:calc(100% - 24px)}
+#mild .mi{display:flex;gap:10px;align-items:center;background:#fff8cc;border-radius:10px;padding:10px 12px;margin-bottom:6px}
+#mild .mi b{font-size:18px;font-variant-numeric:tabular-nums;min-width:56px}
 .row.done .t{text-decoration:line-through;color:var(--sub)}
 .ck{width:52px;height:52px;display:flex;align-items:center;justify-content:center}
 .ck span{width:30px;height:30px;border-radius:9px;border:2.5px solid #9aa7b8;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;background:#fff;transition:.15s}
@@ -170,10 +192,10 @@ textarea.in{min-height:56px;resize:vertical}
  <button class="team" id="teamBtn">👥 <span id="teamName">チーム</span> ▾</button>
  <div class="prog"><span class="ptxt" id="ptxt">今日 0/0</span><span class="pbar"><i id="pbar"></i></span></div>
  <nav class="seg" id="seg">
+  <button data-f="all">すべて</button>
   <button data-f="today" class="on">今日</button>
   <button data-f="mine">自分</button>
   <button data-f="check">確認待ち</button>
-  <button data-f="all">すべて</button>
  </nav>
  <button class="me" id="meBtn">👤 未設定</button>
  <button class="icon" id="setBtn" aria-label="設定">⚙</button>
@@ -194,7 +216,7 @@ textarea.in{min-height:56px;resize:vertical}
    <div class="f"><label>期限日<em>*</em></label>
     <div class="chips" id="eDq"></div>
     <input class="in" type="date" id="eD"></div>
-   <div class="f"><label>警告までの時間<em>*</em>（今から・過ぎると赤警告）</label>
+   <div class="f"><label><span id="eHl">警告までの時間</span><em>*</em><span id="eHn">（今から・過ぎると赤警告）</span></label>
     <div class="chips" id="eHq"></div>
     <div id="eHw"><input class="in" type="time" id="eH"><small style="font-size:11px;color:var(--sub)">↑時刻で直接指定も可</small></div></div>
    <div class="f"><label>優先度</label><div class="chips" id="eP"></div></div>
@@ -252,6 +274,14 @@ textarea.in{min-height:56px;resize:vertical}
    <button class="btn" id="suJoin">参加する</button>
    <p style="margin-top:10px">ホーム画面に追加したアプリでは、もう一度リンクを貼り付けてください。</p></div>
  </div>
+</div></div>
+
+<!-- 軽度警告（本日期限） -->
+<div class="ov" id="mild" style="align-items:center"><div class="card" style="padding:16px">
+ <h4 style="font-size:17px;margin-bottom:4px">📅 今日が期限のタスクがあります</h4>
+ <p style="margin-bottom:10px">時間を過ぎると赤い警告になります。</p>
+ <div id="mildList"></div>
+ <button class="btn" id="mildOk" style="width:100%;margin-top:6px">OK（確認しました）</button>
 </div></div>
 
 <!-- 赤画面警告 -->
@@ -386,7 +416,12 @@ const mineOf = t => !me || t.assignee===me || t.checker===me;
 const prN = p => Math.max(0, PR.indexOf(p||'中'));
 
 const relAt = m => { const at=Math.ceil((Date.now()+m*60e3)/(5*60e3))*(5*60e3); const j=jst(at).toISOString(); return {date:j.slice(0,10),time:j.slice(11,16)}; };
+const noticeOf = (date,na) => (!na && date>todayStr()) ? dueAtOf(date,'08:00') : FAR;
 const isFutureRepeat = t => !t.done && t.repeat && t.repeat!=='none' && t.date > todayStr();
+let checkScope = LS.get('checkScope','mine');
+const ckOf = t => checkScope==='all' || !me || t.checker===me;
+const openRows = new Set();
+const isPreset = t => !t.done && !t.noAlert && t.date===todayStr() && t.dueAt>Date.now() && (t.createdAt||0) < dueAtOf(todayStr(),'00:00');
 function views(){
   const td=todayStr();
   // 繰り返しタスクの次回分は、その日になるまで表示しない（先に完了できないようにする）
@@ -396,7 +431,7 @@ function views(){
   const f = {
     today: { open: open.filter(t=>t.date<=td), done: doneToday },
     mine:  { open: open.filter(t=>mineOf(t)), done: done.filter(t=>mineOf(t)) },
-    check: { open: done.filter(t=>!t.checked && (!me || t.checker===me)), done: done.filter(t=>t.checked && (!me||t.checker===me)).slice(0,20), checkMode:true },
+    check: { open: done.filter(t=>!t.checked && ckOf(t)), done: done.filter(t=>t.checked && ckOf(t)).slice(0,20), checkMode:true },
     all:   { open, done }
   };
   return f;
@@ -418,6 +453,7 @@ function render(){
   $('#meBtn').textContent = '👤 '+(me||'未設定');
   const v=V[filter]; let h='';
   if(v.checkMode){
+    h += `<div class="sub" id="ckScope"><button data-cs="mine" class="${checkScope==='mine'?'on':''}">自分が確認者</button><button data-cs="all" class="${checkScope==='all'?'on':''}">すべて</button></div>`;
     h += `<div class="sec">確認待ち（${v.open.length}）</div>`;
     h += v.open.length ? v.open.map(rowHtml).join('') : `<div class="empty"><b>👍</b>確認待ちはありません</div>`;
     if(v.done.length) h += `<div class="sec">確認済み</div>` + v.done.map(rowHtml).join('');
@@ -438,10 +474,14 @@ function dueHtml(t){
 }
 function rowHtml(t){
   const cls = ['row','p'+prN(t.priority)];
-  if(t.done) cls.push('done'); else if(isOver(t)) cls.push('over'); else if(isSoon(t)) cls.push('soon');
+  if(t.done){ cls.push('done'); if(!t.checked) cls.push('wait'); }
+  else if(isOver(t)) cls.push('over'); else if(isSoon(t)) cls.push('soon'); else if(isPreset(t)) cls.push('mild');
+  if(openRows.has(t.id)) cls.push('xo');
   const who = (n,l) => `<span class="who ${n===me?'me':''}"><i>${l}</i>${esc(n)}</span>`;
   let tail = '';
+  if(isPreset(t)) tail += `<span class="tag y">本日期限</span>`;
   if(t.repeat && t.repeat!=='none') tail += `<span class="tag">🔁${RP[t.repeat]}</span>`;
+  if(t.done && !t.checked) tail += `<span class="tag w">確認待ち</span>`;
   if(t.done){
     tail += t.checked ? `<span class="okd">✓確認 ${esc(t.checkedBy||'')}</span>` : `<button class="cfm" data-act="confirm">確認OK</button>`;
   }
@@ -451,10 +491,31 @@ function rowHtml(t){
    ${dueHtml(t)}
    <div class="ttl" data-act="edit"><div class="t">${esc(t.title)}</div><div class="d">${sub}</div></div>
    <div class="ppl" data-act="edit">${who(t.assignee,'担当')}${who(t.checker,'確認')}</div>
-   <div class="tags">${tail}</div></div>`;
+   <div class="tags">${tail}<button class="xv" data-act="xp" aria-label="詳細">⌄</button></div>
+   <div class="xp"><div>${detailHtml(t)}</div></div></div>`;
+}
+const linkify = s => esc(s).replace(/https?:\/\/[^\s<]+/g, u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+function detailHtml(t){
+  const [,m,d]=t.date.split('-').map(Number);
+  const rows=[
+   ['期限', `${m}/${d}(${WD[dow(t.date)]}) ${t.noAlert?'終日（警告なし）':esc(t.time)}`],
+   ['担当／確認', `${esc(t.assignee)} → ${esc(t.checker)}`],
+   ['優先度', esc(t.priority||'中')],
+   ['繰り返し', RP[t.repeat||'none']],
+   ['作成', `${esc(t.createdBy||'')} ${fmtTs(t.createdAt)}`]];
+  if(t.done) rows.push(['完了', `${esc(t.doneBy||'')} ${fmtTs(t.doneAt)}`]);
+  if(t.checked) rows.push(['確認', `${esc(t.checkedBy||'')} ${fmtTs(t.checkedAt)}`]);
+  if(t.alertCount) rows.push(['超過通知', t.alertCount+'回']);
+  return `<div class="xin">${t.memo?`<div class="memo">${linkify(t.memo)}</div>`:'<div class="memo" style="color:var(--sub)">（詳細メモなし）</div>'}
+   <dl>${rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>
+   <button class="eb" data-act="edit">✏️ 編集する</button></div>`;
 }
 $('#list').addEventListener('click', e=>{
+  const cs=e.target.closest('[data-cs]'); if(cs){ checkScope=cs.dataset.cs; LS.set('checkScope',checkScope); render(); return; }
+  if(e.target.closest('.xin a')) return;
   const a=e.target.closest('[data-act]'); const row=e.target.closest('.row'); if(!row) return;
+  if(a && a.dataset.act==='xp'){ const id=row.dataset.id; if(openRows.has(id)) openRows.delete(id); else openRows.add(id); row.classList.toggle('xo'); return; }
+  if(e.target.closest('.xin') && !a) return;
   const t=tasks.find(x=>x.id===row.dataset.id); if(!t) return;
   const act = a ? a.dataset.act : 'edit';
   if(act==='done') toggleDone(t,row);
@@ -483,7 +544,7 @@ async function toggleDone(t,row){
     row && row.classList.add('leaving');
     await new Promise(r=>setTimeout(r,280));
     // doneNotified:false → 5分ごとの見回りで確認者にプッシュ通知（自分で自分を確認する場合は通知しない）
-    await store.put(t.id,{done:true,doneAt:Date.now(),doneBy:me||'',doneNotified: !!me && me===t.checker,alertAt:FAR});
+    await store.put(t.id,{done:true,doneAt:Date.now(),doneBy:me||'',doneNotified: !!me && me===t.checker,alertAt:FAR,noticeAt:FAR});
     // 繰り返し：次回分を自動作成（同じIDなので二重作成されない）
     if(t.repeat && t.repeat!=='none'){
       let nd = nextDate(t.date,t.repeat); const td=todayStr();
@@ -491,13 +552,13 @@ async function toggleDone(t,row){
       const series = t.series || t.id, nid = series+'_'+nd;
       if(nd && !tasks.some(x=>x.id===nid)){
         await store.put(nid,{title:t.title,memo:t.memo||'',assignee:t.assignee,checker:t.checker,priority:t.priority||'中',repeat:t.repeat,series,
-          date:nd,time:t.time,noAlert:!!t.noAlert,dueAt:dueAtOf(nd,t.noAlert?'23:59':t.time),alertAt:t.noAlert?FAR:dueAtOf(nd,t.time),done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:'（繰り返し）'});
+          date:nd,time:t.time,noAlert:!!t.noAlert,dueAt:dueAtOf(nd,t.noAlert?'23:59':t.time),alertAt:t.noAlert?FAR:dueAtOf(nd,t.time),noticeAt:noticeOf(nd,!!t.noAlert),done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:'（繰り返し）'});
       }
     }
     const td=todayStr(); const left = tasks.filter(x=>!x.done && x.id!==t.id && x.date<=td).length;
     if(left===0 && filter==='today') party(); else toast(`完了：${t.title}`);
   } else {
-    await store.put(t.id,{done:false,doneAt:FAR,doneBy:'',checked:false,checkedBy:'',checkedAt:0,alertAt:t.dueAt});
+    await store.put(t.id,{done:false,doneAt:FAR,doneBy:'',checked:false,checkedBy:'',checkedAt:0,alertAt:t.noAlert?FAR:t.dueAt,noticeAt:noticeOf(t.date,!!t.noAlert)});
     toast('未完了に戻しました');
   }
 }
@@ -520,13 +581,15 @@ function drawForm(){
   chipSet($('#eC'), mem, form.checker, v=>{form.checker=v;drawForm();});
   const td=todayStr(); const days=[[td,'今日'],[addDays(td,1),'明日'],[addDays(td,2),dayLabel(addDays(td,2))]];
   let fri=td; while(dow(fri)!==5) fri=addDays(fri,1); if(!days.some(d=>d[0]===fri)) days.push([fri,'金曜']);
-  chipSet($('#eDq'), days, form.date, v=>{form.date=v;$('#eD').value=v;drawForm();});
-  // 経過時間で警告時刻を設定（今から○分後）
-  const rel=[[30,'30分後'],[60,'1時間後'],[180,'3時間後']].map(([m,l])=>{ const j=relAt(m); return [j.date+'|'+j.time, l]; });
+  chipSet($('#eDq'), days, form.date, v=>{ form.date=v; $('#eD').value=v; if(v!==td && !form.noAlert && !form.timeSet){ form.time='17:00'; $('#eH').value='17:00'; } drawForm();});
+  // 今日：経過時間（今から○分後）／先の日付：その日の時刻
+  let rel;
+  if(form.date===td){ rel=[[30,'30分後'],[60,'1時間後'],[180,'3時間後']].map(([m,l])=>{ const j=relAt(m); return [j.date+'|'+j.time, l]; }); $('#eHl').textContent='警告までの時間'; $('#eHn').textContent='（今から・過ぎると赤警告）'; }
+  else { rel=['09:00','12:00','15:00','17:00'].map(x=>[form.date+'|'+x, x]); $('#eHl').textContent='期限の時刻'; $('#eHn').textContent='（当日朝に黄色のお知らせ・過ぎると赤警告）'; }
   rel.push(['none','不要']);
   chipSet($('#eHq'), rel, form.noAlert ? 'none' : form.date+'|'+form.time, v=>{
     if(v==='none'){ form.noAlert=true; }
-    else { const [d,t]=v.split('|'); form.noAlert=false; form.date=d; form.time=t; $('#eD').value=d; $('#eH').value=t; }
+    else { const [d,t]=v.split('|'); form.noAlert=false; form.timeSet=true; form.date=d; form.time=t; $('#eD').value=d; $('#eH').value=t; }
     drawForm(); });
   $('#eHw').style.display = form.noAlert ? 'none' : '';
   chipSet($('#eP'), PR.map(p=>[p,p]), form.priority, v=>{form.priority=v;drawForm();}, v=>'pr'+PR.indexOf(v));
@@ -537,6 +600,7 @@ function openEdit(t){
   const td=todayStr();
   form = t ? {...t} : {title:'',memo:'',assignee:me||(teamData.members||[])[0]||'',checker:lastChecker||'',...relAt(defMin),noAlert:false,priority:'中',repeat:'none'};
   if(t && t.noAlert && !form.time) form.time=relAt(60).time;
+  form.timeSet=!!t;
   $('#eTitle').textContent = t?'タスク編集':'タスク追加';
   $('#eT').value=form.title; $('#eM').value=form.memo||''; $('#eD').value=form.date; $('#eH').value=form.time;
   $('#eDel').style.display = t?'block':'none';
@@ -545,7 +609,7 @@ function openEdit(t){
   if(!t) setTimeout(()=>$('#eT').focus(),250);
 }
 $('#eD').onchange=e=>{form.date=e.target.value;drawForm();};
-$('#eH').onchange=e=>{form.time=e.target.value;form.noAlert=false;drawForm();};
+$('#eH').onchange=e=>{form.time=e.target.value;form.noAlert=false;form.timeSet=true;drawForm();};
 $('#eT').onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#eT').blur(); } };
 $('#eSave').onclick = async ()=>{
   form.title=$('#eT').value.trim(); form.memo=$('#eM').value.trim(); form.date=$('#eD').value; form.time=$('#eH').value;
@@ -555,10 +619,10 @@ $('#eSave').onclick = async ()=>{
   const data={title:form.title,memo:form.memo,assignee:form.assignee,checker:form.checker,date:form.date,time:tm,noAlert:na,dueAt:dueAtOf(form.date,na?'23:59':tm),priority:form.priority,repeat:form.repeat};
   lastChecker=form.checker; LS.set('lastChecker',lastChecker);
   if(editing){
-    if(editing.dueAt!==data.dueAt || !!editing.noAlert!==na){ data.lastAlertAt=0; if(!editing.done) data.alertAt=na?FAR:data.dueAt; }
+    if(editing.dueAt!==data.dueAt || !!editing.noAlert!==na){ data.lastAlertAt=0; if(!editing.done){ data.alertAt=na?FAR:data.dueAt; data.noticeAt=noticeOf(data.date,na); } }
     await store.put(editing.id,data);
   } else {
-    await store.put(rid(),{...data,alertAt:na?FAR:data.dueAt,done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:me||''});
+    await store.put(rid(),{...data,alertAt:na?FAR:data.dueAt,noticeAt:noticeOf(data.date,na),done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:me||''});
   }
   closeOv(); toast('保存しました');
 };
@@ -635,15 +699,25 @@ $('#suJoin').onclick=async()=>{
 let snooze = LS.get('snooze',{});
 function alertTargets(){
   const td=todayStr(), now=Date.now();
-  return tasks.filter(t=>!t.done && !t.noAlert && t.date===td && t.dueAt<=now && (scope==='all' || mineOf(t)) && !((snooze[t.id]||0)>now));
+  return tasks.filter(t=>!t.done && !t.noAlert && t.date<=td && t.dueAt<=now && (scope==='all' || mineOf(t)) && !((snooze[t.id]||0)>now));
 }
 let alertShown=false;
+// 軽度：前もって登録した「今日が期限」のタスクを、その日最初に開いた時に黄色で知らせる
+let mildSeen = LS.get('mildSeen',{});
+function mildTargets(){ return tasks.filter(t=>isPreset(t) && (scope==='all'||mineOf(t)) && mildSeen[t.id]!==todayStr()); }
+function checkMild(red){
+  const el=$('#mild'); if(red || el.classList.contains('show') || document.querySelector('.ov.show')) return;
+  const list=mildTargets(); if(!list.length) return;
+  $('#mildList').innerHTML=list.map(t=>`<div class="mi"><b>${esc(t.time)}</b><span><strong>${esc(t.title)}</strong><br><small>担当 ${esc(t.assignee)}／確認 ${esc(t.checker)}</small></span></div>`).join('');
+  el.classList.add('show'); if(navigator.vibrate) navigator.vibrate(120);
+}
+$('#mildOk').onclick=()=>{ const td=todayStr(); mildTargets().forEach(t=>mildSeen[t.id]=td); for(const k in mildSeen) if(mildSeen[k]!==td) delete mildSeen[k]; LS.set('mildSeen',mildSeen); $('#mild').classList.remove('show'); };
 function checkAlert(){
-  const list = alertTargets(); const el=$('#alert');
-  if(navigator.setAppBadge){ const n=tasks.filter(t=>!t.done&&t.date===todayStr()&&t.dueAt<=Date.now()&&mineOf(t)).length; (n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{}); }
+  const td=todayStr(); const list = alertTargets(); checkMild(list.length>0); const el=$('#alert');
+  if(navigator.setAppBadge){ const n=tasks.filter(t=>!t.done&&!t.noAlert&&t.date<=todayStr()&&t.dueAt<=Date.now()&&mineOf(t)).length; (n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{}); }
   if(!list.length){ el.classList.remove('show'); alertShown=false; return; }
   $('#alSub').textContent = `${list.length}件・${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})} 現在`;
-  $('#alList').innerHTML = list.map(t=>`<div class="ai" data-id="${esc(t.id)}"><div class="tm">${esc(t.time)}</div><div class="tx"><b>${esc(t.title)}</b><small>担当 ${esc(t.assignee)}／確認 ${esc(t.checker)}${t.memo?'／'+esc(t.memo):''}</small></div><button data-act="done">完了 ✓</button></div>`).join('');
+  $('#alList').innerHTML = list.map(t=>`<div class="ai" data-id="${esc(t.id)}"><div class="tm">${t.date===td?esc(t.time):dayLabel(t.date)}</div><div class="tx"><b>${esc(t.title)}</b><small>担当 ${esc(t.assignee)}／確認 ${esc(t.checker)}${t.memo?'／'+esc(t.memo):''}</small></div><button data-act="done">完了 ✓</button></div>`).join('');
   if(!alertShown){ alertShown=true; if(navigator.vibrate) navigator.vibrate([400,200,400,200,400]); beep(); }
   el.classList.add('show');
 }

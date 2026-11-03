@@ -54,6 +54,26 @@ for (const tref of teams) {
     await d.ref.update({ lastAlertAt: now, alertAt: now + INTERVAL, alertCount: admin.firestore.FieldValue.increment(1) });
   }
 }
+// ===== 当日朝のお知らせ：前もって登録したタスクの期限日 8:00 に軽く通知 =====
+for (const tref of teams) {
+  const snap = await tref.collection('tasks').where('noticeAt', '<=', now).get();
+  if (snap.empty) continue;
+  const subs = (await tref.collection('subs').get()).docs;
+  for (const d of snap.docs) {
+    const t = d.data();
+    if (!t.done && !t.noAlert && t.date === today && t.dueAt > now) {
+      const targets = subs.filter(s => [t.assignee, t.checker].includes(s.data().member));
+      const payload = JSON.stringify({ title: `📅 本日期限：${t.title}`, body: `${t.time}まで／担当 ${t.assignee}・確認 ${t.checker}`, tag: 'notice-' + d.id, url: './?t=' + tref.id, count: 1 });
+      await Promise.all(targets.map(s => { const sd = s.data();
+        return webpush.sendNotification({ endpoint: sd.endpoint, keys: sd.keys }, payload, { TTL: 3600 * 6, urgency: 'normal' })
+          .then(() => { sent++; })
+          .catch(e => { if (e.statusCode === 404 || e.statusCode === 410) return s.ref.delete(); console.error('push失敗', e.statusCode, e.body); });
+      }));
+    }
+    await d.ref.update({ noticeAt: 9999999999999 });
+  }
+}
+
 // ===== 完了通知：担当者が完了したら確認者へ =====
 for (const tref of teams) {
   const snap = await tref.collection('tasks').where('doneNotified', '==', false).get();
