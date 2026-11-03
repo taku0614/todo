@@ -6,7 +6,9 @@ import webpush from 'web-push';
 
 const env = k => { const v = process.env[k]; if (!v) { console.error(`Secret ${k} が未設定です`); process.exit(1); } return v; };
 admin.initializeApp({ credential: admin.credential.cert(JSON.parse(env('FIREBASE_SERVICE_ACCOUNT'))) });
-webpush.setVapidDetails('mailto:' + (process.env.VAPID_SUBJECT || 'todo@example.com'), env('VAPID_PUBLIC'), env('VAPID_PRIVATE'));
+// 貼り付け時の余分な空白・改行・説明文を除去し、鍵の文字列だけを取り出す
+const key = (k, min) => { const m = env(k).match(new RegExp(`[A-Za-z0-9_-]{${min},}`, 'g')); if (!m) { console.error(`${k} の形式が正しくありません`); process.exit(1); } return m[m.length - 1]; };
+webpush.setVapidDetails('mailto:' + (process.env.VAPID_SUBJECT || 'todo@example.com'), key('VAPID_PUBLIC', 80), key('VAPID_PRIVATE', 40));
 const db = admin.firestore();
 
 const now = Date.now();
