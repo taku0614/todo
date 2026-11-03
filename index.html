@@ -34,6 +34,12 @@ header{position:sticky;top:0;z-index:20;background:var(--hd);color:#fff;display:
 .seg .n{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;line-height:18px}
 .me{padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.12);font-size:13px;font-weight:700;white-space:nowrap}
 .clock{font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;color:#dfe6f0;text-align:right;line-height:1.2}
+.team{padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.12);font-size:13px;font-weight:700;white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+.tl{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:2px solid transparent}
+.tl.cur{border-color:var(--main)}
+.tl b{flex:1;font-size:15px}
+.tl small{color:var(--sub);font-size:11px;display:block;font-weight:400}
+.tl .rm{padding:8px 12px;border-radius:9px;background:var(--bad2);color:var(--bad);font-weight:700;font-size:13px}
 .icon{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);font-size:17px}
 #banner{display:none;background:var(--warn2);color:#7a4c0d;font-size:12px;padding:6px 14px;text-align:center}
 #banner.show{display:block}
@@ -153,6 +159,7 @@ textarea.in{min-height:56px;resize:vertical}
 <body>
 <header>
  <div class="brand">✅ チームToDo</div>
+ <button class="team" id="teamBtn">👥 <span id="teamName">チーム</span> ▾</button>
  <div class="prog"><span class="ptxt" id="ptxt">今日 0/0</span><span class="pbar"><i id="pbar"></i></span></div>
  <nav class="seg" id="seg">
   <button data-f="today" class="on">今日</button>
@@ -209,14 +216,22 @@ textarea.in{min-height:56px;resize:vertical}
     <p style="margin-top:6px;word-break:break-all" id="sLink"></p></div>
    <div class="card"><h4>メンバー</h4><div id="sMem"></div>
     <div class="mem"><input class="in" id="sNew" placeholder="名前を追加" maxlength="12"><button style="background:var(--main2);color:#1a4fae" id="sAdd">追加</button></div></div>
-   <div class="card"><h4>チーム</h4><p id="sTeam"></p><div style="margin-top:8px"><button class="btn gray" id="sLeave">別のチームに切り替える</button></div></div>
+   <div class="card"><h4>チーム</h4><p id="sTeam"></p><div style="margin-top:8px"><button class="btn gray" id="sLeave">チームを切り替える</button></div></div>
   </div>
  </div></div>
 </div></div>
 
+<!-- チーム切り替え -->
+<div class="ov" id="teamsOv"><div class="panel">
+ <div class="ph"><span></span><b>チームを切り替え</b><button class="save" data-close>閉じる</button></div>
+ <div class="pb"><div id="tList"></div>
+  <button class="btn" id="tAdd" style="width:100%;margin-top:4px">＋ チームを作る／招待リンクで参加する</button>
+  <p class="meta">参加中のすべてのチームの期限超過・確認依頼が通知されます（各チームで通知ONにした場合）。</p></div>
+</div></div>
+
 <!-- 初回セットアップ -->
 <div id="setup"><div class="wrap">
- <h1>✅ チームToDo</h1>
+ <div style="display:flex;justify-content:space-between;align-items:center"><h1>✅ チームToDo</h1><button class="btn gray" id="suBack" style="display:none">← 戻る</button></div>
  <p class="lead" id="suLead">チームを作るか、招待リンクで参加してください。</p>
  <div class="two">
   <div class="card"><h4>新しくチームを作る</h4>
@@ -272,7 +287,11 @@ const fmtTs = ms => { if(!ms) return ''; const x=jst(ms); return `${x.getUTCMont
 
 /* ---------- 状態 ---------- */
 let team = LS.get('team', null);
-let me = LS.get('me', '');
+let teams = LS.get('teams', []);            // 参加しているチーム一覧 [{id,name}]
+if(team && !teams.some(x=>x.id===team)){ teams.push({id:team,name:''}); LS.set('teams',teams); }
+let me = team ? LS.get('me_'+team, LS.get('me','')) : '';
+const saveMe = () => { if(team) LS.set('me_'+team, me); };
+function useTeam(id){ team=id; LS.set('team',team); if(id && !teams.some(x=>x.id===id)){ teams.push({id,name:''}); LS.set('teams',teams); } me = id ? LS.get('me_'+id,'') : ''; }
 let filter = LS.get('filter', 'today');
 let scope = LS.get('scope', 'mine');
 let defMin = LS.get('defMin', 60);
@@ -335,7 +354,7 @@ async function start(){
   const u = new URL(location.href);
   const q = u.searchParams.get('t');
   const fq = u.searchParams.get('f'); if(['today','mine','check','all'].includes(fq)){ filter=fq; LS.set('filter',filter); u.searchParams.delete('f'); history.replaceState(null,'',u.pathname+(u.search||'')+u.hash); }
-  if(q && q!==team){ team=q; LS.set('team',team); }
+  if(q && q!==team){ useTeam(q); }
   if(q){ u.searchParams.delete('t'); history.replaceState(null,'',u.pathname+(u.search||'')+u.hash); }
   if(demo) showBanner('デモモード：この端末だけで動作中（config.js にFirebase設定を入れると5人で共有されます）');
   if(!team){ showSetup(); return; }
@@ -346,7 +365,7 @@ async function connect(){
   try{ store = demo ? demoStore(team) : await fbStore(team); }
   catch(e){ console.error(e); showBanner('Firebaseに接続できません。config.js と通信を確認してください'); return; }
   $('#setup').classList.remove('show');
-  unsubs.push(store.watchTeam(d=>{ teamData=d||{name:'',members:[]}; if(!teamData.members) teamData.members=[]; render(); if(!me || !teamData.members.includes(me)) { if(teamData.members.length) openSettings(true); } }));
+  unsubs.push(store.watchTeam(d=>{ teamData=d||{name:'',members:[]}; if(!teamData.members) teamData.members=[]; const te=teams.find(x=>x.id===team); if(te && te.name!==(teamData.name||'')){ te.name=teamData.name||''; LS.set('teams',teams); } $('#teamName').textContent=teamData.name||'チーム'; render(); if(!me || !teamData.members.includes(me)) { if(teamData.members.length) openSettings(true); } }));
   unsubs.push(store.watchTasks(Date.now()-7*864e5, arr=>{ notifyDone(arr); tasks=arr; render(); checkAlert(); }));
   syncPush();
 }
@@ -528,7 +547,7 @@ function inviteUrl(){ return location.origin+location.pathname+'?t='+team; }
 function openSettings(force){
   if(!teamData) return;
   const mem=teamData.members||[];
-  chipSet($('#sMe'), mem.map(m=>[m,m]), me, v=>{ me=v; LS.set('me',me); toast(v+' さんで設定しました'); openSettings(); render(); checkAlert(); syncPush(); });
+  chipSet($('#sMe'), mem.map(m=>[m,m]), me, v=>{ me=v; saveMe(); toast(v+' さんで設定しました'); openSettings(); render(); checkAlert(); syncPush(); });
   chipSet($('#sScope'), [['mine','自分が担当・確認のみ'],['all','チーム全員分']], scope, v=>{ scope=v; LS.set('scope',scope); openSettings(); checkAlert(); });
   chipSet($('#sDef'), [[30,'30分後'],[60,'1時間後'],[120,'2時間後'],[180,'3時間後']].map(([m,l])=>[String(m),l]), String(defMin), v=>{ defMin=+v; LS.set('defMin',defMin); openSettings(); });
   $('#sMem').innerHTML = mem.map((m,i)=>`<div class="mem"><input class="in" value="${esc(m)}" data-i="${i}" maxlength="12"><button data-rm="${i}">削除</button></div>`).join('') || '<p class="meta">まだメンバーがいません</p>';
@@ -538,28 +557,53 @@ function openSettings(force){
   $('#sett').classList.add('show');
   if(force===true) toast('最初に「あなたは誰？」を選んでください');
 }
-$('#sMem').addEventListener('change', e=>{ const i=e.target.dataset.i; if(i==null) return; const v=e.target.value.trim(); if(!v) return; const mem=[...teamData.members]; const old=mem[i]; mem[i]=v; store.setTeam({members:mem}); if(me===old){me=v;LS.set('me',me);} });
+$('#sMem').addEventListener('change', e=>{ const i=e.target.dataset.i; if(i==null) return; const v=e.target.value.trim(); if(!v) return; const mem=[...teamData.members]; const old=mem[i]; mem[i]=v; store.setTeam({members:mem}); if(me===old){me=v;saveMe();} });
 $('#sMem').addEventListener('click', e=>{ const i=e.target.dataset.rm; if(i==null) return; const mem=[...teamData.members]; if(!confirm(`${mem[i]} さんをメンバーから外しますか？（タスクは残ります）`)) return; mem.splice(i,1); store.setTeam({members:mem}).then(()=>openSettings()); });
 $('#sAdd').onclick=()=>{ const v=$('#sNew').value.trim(); if(!v) return; const mem=[...(teamData.members||[])]; if(mem.includes(v)){toast('同じ名前がいます');return;} mem.push(v); $('#sNew').value=''; store.setTeam({members:mem}).then(()=>openSettings()); };
 $('#sShare').onclick=async()=>{ const url=inviteUrl(); if(navigator.share){ try{ await navigator.share({title:'チームToDo',text:`「${teamData.name||'チームToDo'}」に参加してください`,url}); return; }catch(e){ if(e.name==='AbortError') return; } } copy(url); };
 $('#sCopy').onclick=()=>copy(inviteUrl());
 async function copy(s){ try{ await navigator.clipboard.writeText(s); toast('コピーしました'); }catch(e){ prompt('コピーしてください',s); } }
-$('#sLeave').onclick=()=>{ if(!confirm('別のチームに切り替えますか？（今のチームのデータは消えません）')) return; LS.set('team',null); team=null; teamData=null; tasks=[]; unsubs.forEach(f=>{try{f()}catch(e){}}); closeOv(); showSetup(); };
+$('#sLeave').onclick=()=>{ closeOv(); openTeams(); };
 $('#meBtn').onclick=()=>openSettings();
 $('#setBtn').onclick=()=>openSettings();
 
+/* ---------- チーム切り替え ---------- */
+function openTeams(){
+  $('#tList').innerHTML = teams.map(x=>`<div class="tl ${x.id===team?'cur':''}" data-id="${esc(x.id)}"><b>${x.id===team?'✓ ':''}${esc(x.name||'(名前なし)')}<small>あなた：${esc(LS.get('me_'+x.id,'')||'未設定')}</small></b><button class="rm" data-rm="1">抜ける</button></div>`).join('') || '<p class="meta">参加中のチームはありません</p>';
+  $('#teamsOv').classList.add('show');
+}
+$('#tList').addEventListener('click', async e=>{
+  const row=e.target.closest('.tl'); if(!row) return; const id=row.dataset.id;
+  if(e.target.dataset.rm){
+    const x=teams.find(t=>t.id===id);
+    if(!confirm(`「${x.name||'(名前なし)'}」から抜けますか？\n（チームのデータは消えません。招待リンクで再参加できます）`)) return;
+    teams=teams.filter(t=>t.id!==id); LS.set('teams',teams);
+    if(id===team){ closeOv(); if(teams.length){ await switchTeam(teams[0].id); } else { useTeam(null); teamData=null; tasks=[]; unsubs.forEach(f=>{try{f()}catch(e){}}); showSetup(); } }
+    else openTeams();
+    return;
+  }
+  if(id!==team){ closeOv(); await switchTeam(id); }
+});
+$('#tAdd').onclick=()=>{ closeOv(); $('#suName').value=''; $('#suMem').value=''; $('#suCode').value=''; showSetup(); };
+$('#teamBtn').onclick=()=>openTeams();
+async function switchTeam(id){
+  useTeam(id); teamData=null; tasks=[]; seenDone.clear(); $('#list').innerHTML=''; $('#teamName').textContent='…';
+  await connect(); toast('チームを切り替えました');
+}
+
 /* ---------- 初回 ---------- */
-function showSetup(){ $('#setup').classList.add('show'); }
+function showSetup(){ $('#suBack').style.display = teams.length && team ? '' : 'none'; $('#setup').classList.add('show'); }
+$('#suBack').onclick=()=>{ $('#setup').classList.remove('show'); };
 $('#suMake').onclick=async()=>{
   const name=$('#suName').value.trim(); const mem=[...new Set($('#suMem').value.split(/[、,，\s]+/).map(s=>s.trim()).filter(Boolean))];
   if(!mem.length){ toast('メンバーを1人以上入力してください'); return; }
-  team=rid(20); LS.set('team',team); me=''; LS.set('me','');
+  useTeam(rid(20));
   await connect(); await store.setTeam({name,members:mem,createdAt:Date.now()});
 };
 $('#suJoin').onclick=async()=>{
   let v=$('#suCode').value.trim(); const m=v.match(/[?&]t=([A-Za-z0-9]+)/); if(m) v=m[1];
   if(!/^[A-Za-z0-9]{12,}$/.test(v)){ toast('招待リンク／コードが正しくありません'); return; }
-  team=v; LS.set('team',team); me=''; LS.set('me',''); await connect();
+  useTeam(v); await connect();
 };
 
 /* ---------- 赤画面警告 ---------- */

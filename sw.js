@@ -26,7 +26,7 @@ self.addEventListener('notificationclick', e => {
   const url = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
   e.waitUntil((async () => {
     const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for (const c of list) { if (c.url.startsWith(self.registration.scope)) { await c.focus(); return; } }
+    for (const c of list) { if (c.url.startsWith(self.registration.scope)) { try { await c.navigate(url); } catch (_) {} await c.focus(); return; } }
     await self.clients.openWindow(url);
   })());
 });

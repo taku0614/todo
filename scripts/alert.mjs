@@ -42,7 +42,7 @@ for (const tref of teams) {
       const payload = JSON.stringify({
         title: `⚠ 期限超過：${t.title}`,
         body: `${t.time}期限（${late}分超過）／担当 ${t.assignee}・確認 ${t.checker}`,
-        tag: 'task-' + d.id, url: './?alert=1', count: overdueBy(sd.member)
+        tag: 'task-' + d.id, url: './?t=' + tref.id, count: overdueBy(sd.member)
       });
       return webpush.sendNotification({ endpoint: sd.endpoint, keys: sd.keys }, payload, { TTL: 3600, urgency: 'high' })
         .then(() => { sent++; })
@@ -67,7 +67,7 @@ for (const tref of teams) {
       const payload = JSON.stringify({
         title: `✅ 確認依頼：${t.title}`,
         body: `${t.doneBy || '担当者'}さんが完了しました。確認をお願いします`,
-        tag: 'done-' + d.id, url: './?f=check', count: 1
+        tag: 'done-' + d.id, url: './?t=' + tref.id + '&f=check', count: 1
       });
       await Promise.all(targets.map(s => { const sd = s.data();
         return webpush.sendNotification({ endpoint: sd.endpoint, keys: sd.keys }, payload, { TTL: 86400, urgency: 'normal' })
