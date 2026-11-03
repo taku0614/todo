@@ -19,14 +19,18 @@ const today = new Date(now + 9 * 3600e3).toISOString().slice(0, 10); // 日本�
 let sent = 0;
 const teams = await db.collection('teams').listDocuments();
 for (const tref of teams) {
-  const snap = await tref.collection('tasks').where('done', '==', false).get();
-  const due = snap.docs.filter(d => {
+  // alertAt（次に通知すべき時刻）が来たタスクだけを読む → 読み取り回数を最小化（無料枠対策）
+  const snap = await tref.collection('tasks').where('alertAt', '<=', now).get();
+  if (snap.empty) continue;
+  const due = [];
+  for (const d of snap.docs) {
     const t = d.data();
-    return t.date === today && t.dueAt <= now && (!t.lastAlertAt || now - t.lastAlertAt >= INTERVAL - 60e3);
-  });
+    if (t.done || t.date !== today) { await d.ref.update({ alertAt: 9999999999999 }); continue; } // 完了済み・前日以前は通知対象外
+    due.push(d);
+  }
   if (!due.length) continue;
   const subs = (await tref.collection('subs').get()).docs;
-  const overdueBy = name => snap.docs.filter(d => { const t = d.data(); return t.date === today && t.dueAt <= now && (t.assignee === name || t.checker === name); }).length;
+  const overdueBy = name => due.filter(d => { const t = d.data(); return t.assignee === name || t.checker === name; }).length;
 
   for (const d of due) {
     const t = d.data();
@@ -47,7 +51,7 @@ for (const tref of teams) {
           console.error('push失敗', e.statusCode, e.body);
         });
     }));
-    await d.ref.update({ lastAlertAt: now, alertCount: admin.firestore.FieldValue.increment(1) });
+    await d.ref.update({ lastAlertAt: now, alertAt: now + INTERVAL, alertCount: admin.firestore.FieldValue.increment(1) });
   }
 }
 // ===== 完了通知：担当者が完了したら確認者へ =====

@@ -446,7 +446,7 @@ async function toggleDone(t,row){
     row && row.classList.add('leaving');
     await new Promise(r=>setTimeout(r,280));
     // doneNotified:false → 5分ごとの見回りで確認者にプッシュ通知（自分で自分を確認する場合は通知しない）
-    await store.put(t.id,{done:true,doneAt:Date.now(),doneBy:me||'',doneNotified: !!me && me===t.checker});
+    await store.put(t.id,{done:true,doneAt:Date.now(),doneBy:me||'',doneNotified: !!me && me===t.checker,alertAt:FAR});
     // 繰り返し：次回分を自動作成（同じIDなので二重作成されない）
     if(t.repeat && t.repeat!=='none'){
       let nd = nextDate(t.date,t.repeat); const td=todayStr();
@@ -454,13 +454,13 @@ async function toggleDone(t,row){
       const series = t.series || t.id, nid = series+'_'+nd;
       if(nd && !tasks.some(x=>x.id===nid)){
         await store.put(nid,{title:t.title,memo:t.memo||'',assignee:t.assignee,checker:t.checker,priority:t.priority||'中',repeat:t.repeat,series,
-          date:nd,time:t.time,dueAt:dueAtOf(nd,t.time),done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:'（繰り返し）'});
+          date:nd,time:t.time,dueAt:dueAtOf(nd,t.time),alertAt:dueAtOf(nd,t.time),done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:'（繰り返し）'});
       }
     }
     const td=todayStr(); const left = tasks.filter(x=>!x.done && x.id!==t.id && x.date<=td).length;
     if(left===0 && filter==='today') party(); else toast(`完了：${t.title}`);
   } else {
-    await store.put(t.id,{done:false,doneAt:FAR,doneBy:'',checked:false,checkedBy:'',checkedAt:0});
+    await store.put(t.id,{done:false,doneAt:FAR,doneBy:'',checked:false,checkedBy:'',checkedAt:0,alertAt:t.dueAt});
     toast('未完了に戻しました');
   }
 }
@@ -511,10 +511,10 @@ $('#eSave').onclick = async ()=>{
   const data={title:form.title,memo:form.memo,assignee:form.assignee,checker:form.checker,date:form.date,time:form.time,dueAt:dueAtOf(form.date,form.time),priority:form.priority,repeat:form.repeat};
   lastChecker=form.checker; LS.set('lastChecker',lastChecker);
   if(editing){
-    if(editing.dueAt!==data.dueAt) data.lastAlertAt=0;
+    if(editing.dueAt!==data.dueAt){ data.lastAlertAt=0; if(!editing.done) data.alertAt=data.dueAt; }
     await store.put(editing.id,data);
   } else {
-    await store.put(rid(),{...data,done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:me||''});
+    await store.put(rid(),{...data,alertAt:data.dueAt,done:false,doneAt:FAR,checked:false,createdAt:Date.now(),createdBy:me||''});
   }
   closeOv(); toast('保存しました');
 };
