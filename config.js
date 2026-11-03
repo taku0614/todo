@@ -1,6 +1,6 @@
 // ===== チームToDo 設定ファイル =====
-// Firebaseコンソール「プロジェクトの設定 → マイアプリ（</>）」に表示される firebaseConfig を
-// 下の firebase: {
+window.TODO_CONFIG = {
+  firebase: {
     apiKey: "AIzaSyCu8Yma3PmLADrXzL3YD8x_Tq1ZTqscT2U",
     authDomain: "todo-61a79.firebaseapp.com",
     projectId: "todo-61a79",
