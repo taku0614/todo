@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>チームToDo</title>
-<meta name="theme-color" content="#1c2533">
+<meta name="theme-color" content="#0d1c14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,26 +14,26 @@
 <link rel="manifest" href="manifest.json">
 <script src="config.js"></script>
 <style>
-:root{--bg:#f3f5f9;--card:#fff;--ink:#1c2533;--sub:#6b7686;--line:#e4e8ef;--main:#1f6feb;--main2:#e3edff;--ok:#24946a;--ok2:#ddf3e9;--warn:#d9821a;--warn2:#fdf0dc;--bad:#d93a3a;--bad2:#fde4e4;--hd:#1c2533}
+:root{--bg:#eceff0;--card:#fff;--ink:#14231b;--sub:#66737a;--line:#d8dee1;--main:#1a5c3a;--main2:#dfece4;--ok:#6c7f89;--ok2:#e4eaed;--warn:#d9821a;--warn2:#fdf0dc;--bad:#d93a3a;--bad2:#fde4e4;--hd:#0d1c14;--silver:#c3cdd2}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{overflow-x:hidden;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 input,select,textarea{font:inherit;color:inherit}
 /* header */
-header{position:sticky;top:0;z-index:20;background:var(--hd);color:#fff;display:flex;align-items:center;gap:10px;
+header{border-bottom:2px solid var(--silver);position:sticky;top:0;z-index:20;background:var(--hd);color:#fff;display:flex;align-items:center;gap:10px;
  padding:calc(6px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) 6px calc(10px + env(safe-area-inset-left));min-height:50px}
 .brand{font-weight:800;font-size:16px;white-space:nowrap}
 .prog{display:flex;align-items:center;gap:8px;min-width:120px}
 .ptxt{font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .pbar{width:80px;height:8px;background:rgba(255,255,255,.18);border-radius:5px;overflow:hidden}
-.pbar i{display:block;height:100%;width:0;background:#46d39a;transition:width .4s}
+.pbar i{display:block;height:100%;width:0;background:var(--silver);transition:width .4s}
 .seg{display:flex;background:rgba(255,255,255,.1);border-radius:10px;padding:3px;gap:2px;margin-left:auto}
-.seg button{padding:7px 12px;border-radius:8px;font-size:13px;font-weight:700;color:#c9d2df;white-space:nowrap;position:relative}
-.seg button.on{background:#fff;color:var(--hd)}
+.seg button{padding:7px 12px;border-radius:8px;font-size:13px;font-weight:700;color:#aebcc3;white-space:nowrap;position:relative}
+.seg button.on{background:linear-gradient(180deg,#eef2f3,#c3cdd2);color:var(--hd)}
 .seg .n{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;line-height:18px}
 .me{padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.12);font-size:13px;font-weight:700;white-space:nowrap}
-.clock{font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;color:#dfe6f0;text-align:right;line-height:1.2}
+.clock{font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;color:#d5dde1;text-align:right;line-height:1.2}
 .team{padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.12);font-size:13px;font-weight:700;white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
 .tl{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:2px solid transparent}
 .tl.cur{border-color:var(--main)}
@@ -48,19 +48,19 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .sec{font-size:12px;font-weight:700;color:var(--sub);margin:12px 4px 6px;display:flex;align-items:center;gap:8px}
 .sec::after{content:"";flex:1;height:1px;background:var(--line)}
 .row{display:grid;grid-template-columns:52px 96px 1fr auto auto;align-items:center;gap:8px;background:var(--card);border-radius:12px;margin-bottom:6px;min-height:58px;padding:4px 10px 4px 0;
- box-shadow:0 1px 2px rgba(0,0,0,.05);border-left:5px solid #c9d1dc;transition:transform .35s,opacity .35s}
-.row.p0{border-left-color:var(--bad)}.row.p1{border-left-color:var(--warn)}.row.p2{border-left-color:#9fb0c4}
+ box-shadow:0 1px 2px rgba(0,0,0,.05);border-left:5px solid #bcc7cc;transition:transform .35s,opacity .35s}
+.row.p0{border-left-color:var(--bad)}.row.p1{border-left-color:var(--warn)}.row.p2{border-left-color:#a3b0b6}
 .row.over{background:var(--bad2)}
 .row.soon{background:var(--warn2)}
 .row.leaving{transform:translateY(30px);opacity:0}
 .row.done{opacity:.62;border-left-color:var(--ok)}
-.row.done.wait{opacity:1;background:#eaf8f1;border-left-color:var(--ok)}
+.row.done.wait{opacity:1;background:#e9eef1;border-left-color:var(--ok)}
 .row.done.wait .t{text-decoration:none;color:var(--ink)}
 .row.mild{background:#fffbe0}
-.tag.w{background:#d7f3e5;color:#16784f;font-weight:700}
+.tag.w{background:#dde5e9;color:#46565f;font-weight:700}
 .tag.y{background:#fff1a8;color:#7a5d00;font-weight:700}
-.xv{width:34px;height:34px;border-radius:9px;background:#eef1f6;color:var(--sub);font-size:15px;font-weight:900;transition:transform .25s;flex:none}
-.xe{height:34px;padding:0 10px;border-radius:9px;background:#eef1f6;color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap}
+.xv{width:34px;height:34px;border-radius:9px;background:#eef1f2;color:var(--sub);font-size:15px;font-weight:900;transition:transform .25s;flex:none}
+.xe{height:34px;padding:0 10px;border-radius:9px;background:#eef1f2;color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap}
 .acts .xv{width:auto}
 .row.xo .xv{transform:rotate(180deg);background:var(--main2);color:var(--main)}
 .xp{grid-column:1/-1;display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
@@ -72,7 +72,7 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .xin dl{display:grid;grid-template-columns:auto 1fr;gap:0 12px}
 .xin dt{color:var(--sub)}
 .xin .eb{margin-top:8px;padding:8px 16px;border-radius:9px;background:var(--main);color:#fff;font-weight:700;font-size:13px}
-.sub{display:flex;gap:4px;background:#e6eaf0;border-radius:10px;padding:3px;margin:10px 4px 0;width:max-content}
+.sub{display:flex;gap:4px;background:#dfe4e6;border-radius:10px;padding:3px;margin:10px 4px 0;width:max-content}
 .sub button{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;color:var(--sub)}
 .sub button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 #mild .card{max-width:520px;margin:auto;width:calc(100% - 24px)}
@@ -80,7 +80,7 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 #mild .mi b{font-size:18px;font-variant-numeric:tabular-nums;min-width:56px}
 .row.done .t{text-decoration:line-through;color:var(--sub)}
 .ck{width:52px;height:52px;display:flex;align-items:center;justify-content:center}
-.ck span{width:30px;height:30px;border-radius:9px;border:2.5px solid #9aa7b8;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;background:#fff;transition:.15s}
+.ck span{width:30px;height:30px;border-radius:9px;border:2.5px solid #93a2a9;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;background:#fff;transition:.15s}
 .row.over .ck span{border-color:var(--bad)}
 .row.done .ck span{background:var(--ok);border-color:var(--ok)}
 .due{line-height:1.15}
@@ -92,18 +92,18 @@ main{padding:8px calc(10px + env(safe-area-inset-right)) calc(90px + env(safe-ar
 .t{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .d{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ppl{display:flex;gap:5px;flex-wrap:nowrap;align-items:center}
-.who{font-size:12px;padding:4px 8px;border-radius:7px;background:#eef1f6;white-space:nowrap}
+.who{font-size:12px;padding:4px 8px;border-radius:7px;background:#eef1f2;white-space:nowrap}
 .who i{font-style:normal;color:var(--sub);font-size:10px;margin-right:3px}
-.who.mine{background:var(--main2);color:#1a4fae;font-weight:700}
+.who.mine{background:var(--main2);color:#14482d;font-weight:700}
 .tags{display:flex;gap:4px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
 .tags:empty{display:none}
 .acts{display:flex;flex-direction:column;gap:5px;align-items:stretch}
-.tag{font-size:11px;padding:3px 6px;border-radius:6px;background:#eef1f6;color:var(--sub);white-space:nowrap}
+.tag{font-size:11px;padding:3px 6px;border-radius:6px;background:#eef1f2;color:var(--sub);white-space:nowrap}
 .cfm{font-size:12px;font-weight:700;padding:7px 10px;border-radius:8px;background:var(--main);color:#fff;white-space:nowrap}
 .okd{font-size:11px;color:var(--ok);font-weight:700;white-space:nowrap}
 .empty{text-align:center;color:var(--sub);padding:34px 10px;font-size:14px}
 .empty b{display:block;font-size:30px;margin-bottom:6px}
-.fab{position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:62px;height:62px;border-radius:50%;background:var(--main);color:#fff;font-size:34px;font-weight:300;box-shadow:0 6px 16px rgba(31,111,235,.4);z-index:15}
+.fab{position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:62px;height:62px;border-radius:50%;background:var(--main);color:#fff;font-size:34px;font-weight:300;box-shadow:0 6px 16px rgba(13,28,20,.45),inset 0 0 0 3px var(--silver);z-index:15}
 /* sheets */
 .ov{position:fixed;inset:0;padding-top:env(safe-area-inset-top);background:rgba(15,22,33,.45);z-index:40;display:none;align-items:flex-end;justify-content:center}
 .ov.show{display:flex}
@@ -128,7 +128,7 @@ textarea.in{min-height:56px;resize:vertical}
 .chip.on{background:var(--main);border-color:var(--main);color:#fff}
 .chip.pr0.on{background:var(--bad);border-color:var(--bad)}
 .chip.pr1.on{background:var(--warn);border-color:var(--warn)}
-.chip.pr2.on{background:#7c8da3;border-color:#7c8da3}
+.chip.pr2.on{background:#7d8d95;border-color:#7d8d95}
 .inl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .inl .in{width:auto;flex:1;min-width:130px}
 .del{margin-top:16px;width:100%;padding:12px;border-radius:10px;background:var(--bad2);color:var(--bad);font-weight:700}
@@ -137,8 +137,8 @@ textarea.in{min-height:56px;resize:vertical}
 .card h4{font-size:13px;margin-bottom:8px}
 .card p{font-size:12px;color:var(--sub);line-height:1.6}
 .btn{display:inline-block;padding:10px 16px;border-radius:10px;background:var(--main);color:#fff;font-weight:700;font-size:14px}
-.btn.sub{background:var(--main2);color:#1a4fae}
-.btn.gray{background:#eef1f6;color:var(--ink)}
+.btn.sub{background:var(--main2);color:#14482d}
+.btn.gray{background:#eef1f2;color:var(--ink)}
 .mem{display:flex;gap:6px;margin-bottom:6px}
 .mem .in{padding:8px 10px}
 .mem button{padding:0 12px;white-space:nowrap;flex:none;border-radius:9px;background:var(--bad2);color:var(--bad);font-weight:700}
@@ -270,7 +270,7 @@ textarea.in{min-height:56px;resize:vertical}
     <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" id="sShare">招待リンクを送る</button><button class="btn sub" id="sCopy">コピー</button></div>
     <p style="margin-top:6px;word-break:break-all" id="sLink"></p></div>
    <div class="card"><h4>メンバー</h4><div id="sMem"></div>
-    <div class="mem"><input class="in" id="sNew" placeholder="名前を追加" maxlength="12"><button style="background:var(--main2);color:#1a4fae" id="sAdd">追加</button></div></div>
+    <div class="mem"><input class="in" id="sNew" placeholder="名前を追加" maxlength="12"><button style="background:var(--main2);color:#14482d" id="sAdd">追加</button></div></div>
    <div class="card"><h4>📖 使い方ガイド</h4><p>はじめての人向けの説明書です。</p><div style="margin-top:8px"><a class="btn sub" href="manual.html" style="text-decoration:none">ガイドを開く</a></div></div>
    <div class="card"><h4>チーム</h4><p id="sTeam"></p><div style="margin-top:8px"><button class="btn gray" id="sLeave">チームを切り替える</button></div></div>
   </div>
