@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>チームToDo 使い方ガイド</title>
+<meta name="theme-color" content="#1c2533">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root{--ink:#1c2533;--sub:#6b7686;--bg:#f3f5f9;--main:#1f6feb;--main2:#e3edff;--red:#ff2d55;--ok:#24946a;--line:#e4e8ef}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-text-size-adjust:100%}
+.hero{background:var(--ink);color:#fff;padding:calc(28px + env(safe-area-inset-top)) 20px 26px;text-align:center}
+.hero img{width:72px;height:72px;border-radius:18px}
+.hero h1{font-size:24px;margin-top:10px}
+.hero p{font-size:14px;color:#c9d2df;margin-top:4px}
+nav.toc{position:sticky;top:0;z-index:5;background:rgba(243,245,249,.96);backdrop-filter:blur(8px);display:flex;gap:6px;overflow-x:auto;padding:10px 12px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
+nav.toc a{flex:none;font-size:13px;font-weight:700;color:var(--ink);text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:20px;padding:6px 12px}
+main{max-width:640px;margin:0 auto;padding:8px 14px 60px}
+section{margin-top:26px}
+h2{display:flex;align-items:center;gap:10px;font-size:20px;margin-bottom:12px}
+h2 .n{flex:none;width:34px;height:34px;border-radius:50%;background:var(--main);color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center}
+.card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.shot{display:block;width:100%;border-radius:12px;border:1px solid var(--line)}
+.shot.p{max-width:300px;margin:0 auto}
+ol.k{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:8px}
+ol.k li{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+ol.k b.m{flex:none;width:26px;height:26px;border-radius:50%;background:var(--red);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.lead{font-size:15px;margin-bottom:10px}
+.tip{background:var(--main2);color:#1a4fae;border-radius:12px;padding:10px 12px;font-size:14px;margin-top:10px}
+.warn{background:#fde4e4;color:#a12424;border-radius:12px;padding:10px 12px;font-size:14px;margin-top:10px}
+.feat{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.feat div{background:#fff;border-radius:14px;padding:14px 6px;font-size:13px;font-weight:700}
+.feat i{display:block;font-style:normal;font-size:30px;margin-bottom:4px}
+/* 端末タブ */
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs button{flex:1;font:inherit;font-weight:800;font-size:15px;padding:10px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink)}
+.tabs button.on{border-color:var(--main);background:var(--main);color:#fff}
+.os{display:none}.os.on{display:block}
+/* 図解（スマホ画面の模式図） */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ph{background:#fff;border:2px solid #cfd6e0;border-radius:22px;aspect-ratio:9/16;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.ph .bar{height:16%;background:#f1f3f6}
+.ph .body{flex:1;padding:8px;font-size:10px;color:var(--sub)}
+.ph .tool{height:15%;background:#f1f3f6;display:flex;align-items:center;justify-content:space-around;font-size:15px;color:#3a76f0}
+.ph .hl{outline:3px solid var(--red);outline-offset:2px;border-radius:6px}
+.ph .sheet{position:absolute;left:0;right:0;bottom:0;background:#f7f8fa;border-top-left-radius:14px;border-top-right-radius:14px;padding:8px;font-size:11px;box-shadow:0 -4px 12px rgba(0,0,0,.12)}
+.ph .sheet div{background:#fff;border-radius:8px;padding:6px 8px;margin-top:5px;display:flex;justify-content:space-between;align-items:center;color:var(--ink)}
+.ph .home{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:20% 12px 0;align-content:start;background:linear-gradient(160deg,#7aa2ff,#b691ff)}
+.ph .home span{aspect-ratio:1;border-radius:22%;background:rgba(255,255,255,.55)}
+.ph .home img{width:100%;border-radius:22%;outline:3px solid var(--red);outline-offset:2px}
+.cap{font-size:12px;text-align:center;margin-top:6px;font-weight:700}
+.cap b{color:var(--red)}
+/* 通知の模式図 */
+.noti{background:rgba(255,255,255,.85);border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;box-shadow:0 2px 10px rgba(0,0,0,.12);font-size:13px}
+.noti img{width:34px;height:34px;border-radius:8px}
+.noti b{display:block;font-size:14px}
+.lock{background:linear-gradient(160deg,#36406b,#6b4f8f);border-radius:20px;padding:16px 12px;color:#fff}
+.lock .t{text-align:center;font-size:40px;font-weight:300;margin-bottom:10px}
+.lock .noti{color:var(--ink);margin-top:8px}
+.dlg{background:#fff;border-radius:14px;max-width:270px;margin:0 auto;text-align:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.dlg p{padding:14px 14px 10px;font-size:13px}
+.dlg p b{display:block;font-size:15px;margin-bottom:4px}
+.dlg .bt{display:flex;border-top:1px solid var(--line)}
+.dlg .bt span{flex:1;padding:10px;font-size:15px;color:#3a76f0}
+.dlg .bt span+span{border-left:1px solid var(--line);font-weight:700;outline:3px solid var(--red);outline-offset:-3px;border-radius:0 0 14px 0}
+details{background:#fff;border-radius:14px;margin-bottom:8px;padding:12px 14px}
+details summary{font-weight:800;font-size:15px;cursor:pointer}
+details p{font-size:14px;margin-top:8px;color:#333}
+.go{display:block;text-align:center;background:var(--main);color:#fff;text-decoration:none;font-weight:800;border-radius:14px;padding:14px;margin-top:20px;font-size:16px}
+footer{text-align:center;font-size:12px;color:var(--sub);margin-top:30px}
+</style>
+</head>
+<body>
+<div class="hero">
+ <img src="icon-192.png" alt="">
+ <h1>チームToDo 使い方ガイド</h1>
+ <p>はじめての方向け・5分で使えるようになります</p>
+</div>
+<nav class="toc">
+ <a href="#s1">①入れる</a><a href="#s2">②参加</a><a href="#s3">③通知ON</a><a href="#s4">④画面の見方</a><a href="#s5">⑤追加</a><a href="#s6">⑥完了</a><a href="#s7">⑦赤い警告</a><a href="#s8">⑧確認</a><a href="#s9">⑨招待・切替</a><a href="#faq">困ったら</a>
+</nav>
+<main>
+
+<section>
+ <div class="feat">
+  <div><i>👥</i>5人で<br>同じリスト</div>
+  <div><i>🚨</i>期限切れは<br>赤く警告</div>
+  <div><i>✅</i>完了したら<br>確認者へ通知</div>
+ </div>
+</section>
+
+<!-- 1 -->
+<section id="s1">
+ <h2><span class="n">1</span>ホーム画面に入れる</h2>
+ <p class="lead">届いた<b>招待リンク</b>を開いて、アプリとしてホーム画面に追加します。</p>
+ <div class="tabs"><button class="on" data-os="ios">iPhone</button><button data-os="and">Android</button></div>
+ <div class="os on" id="ios"><div class="card">
+  <div class="steps">
+   <div><div class="ph"><div class="bar"></div><div class="body">招待リンクを<br><b>Safari</b>で開く</div><div class="tool"><span>‹</span><span>›</span><span class="hl">⬆︎</span><span>📖</span><span>⧉</span></div></div><p class="cap"><b>共有ボタン</b>を押す</p></div>
+   <div><div class="ph"><div class="bar"></div><div class="body"></div><div class="sheet">共有<div>コピー<span>⧉</span></div><div class="hl">ホーム画面に追加<span>⊞</span></div><div>ブックマーク<span>📖</span></div></div></div><p class="cap"><b>ホーム画面に追加</b></p></div>
+   <div><div class="ph"><div class="home"><span></span><span></span><span></span><span></span><img src="icon-192.png" alt=""><span></span></div></div><p class="cap"><b>このアイコン</b>から開く</p></div>
+  </div>
+  <div class="warn">⚠ iPhoneは<b>必ずSafari</b>で開いてください（LINEの中のブラウザでは追加できません）。LINEで開いた場合は、右下の「︙」→「Safariで開く」。</div>
+ </div></div>
+ <div class="os" id="and"><div class="card">
+  <div class="steps">
+   <div><div class="ph"><div class="bar" style="display:flex;justify-content:flex-end;align-items:center;padding-right:8px;font-size:16px"><span class="hl" style="padding:0 4px">⋮</span></div><div class="body">招待リンクを<br><b>Chrome</b>で開く</div></div><p class="cap">右上の<b>︙</b>を押す</p></div>
+   <div><div class="ph"><div class="bar"></div><div class="sheet" style="top:6%;bottom:auto;left:30%;border-radius:10px">メニュー<div>新しいタブ</div><div class="hl">ホーム画面に追加</div><div>共有</div></div></div><p class="cap"><b>ホーム画面に追加</b></p></div>
+   <div><div class="ph"><div class="home"><span></span><span></span><span></span><span></span><img src="icon-192.png" alt=""><span></span></div></div><p class="cap"><b>このアイコン</b>から開く</p></div>
+  </div>
+  <div class="tip">「アプリをインストール」と表示された場合はそちらでもOKです。</div>
+ </div></div>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+ <h2><span class="n">2</span>チームに参加する</h2>
+ <div class="card">
+  <img class="shot p" src="manual/join.jpg" alt="参加画面">
+  <ol class="k">
+   <li><b class="m">1</b><span>招待リンクを<b>もう一度貼り付け</b>（リンクを長押し→コピー）</span></li>
+   <li><b class="m">2</b><span>「参加する」を押す</span></li>
+  </ol>
+  <div class="tip">💡 iPhoneはSafariとホーム画面のアプリで中身が別々のため、アプリ側でもう一度貼り付けが必要です。</div>
+ </div>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+ <h2><span class="n">3</span>名前を選んで、通知をON</h2>
+ <div class="card">
+  <img class="shot p" src="manual/me.jpg" alt="設定画面">
+  <ol class="k">
+   <li><b class="m">1</b><span>「あなたは誰？」で<b>自分の名前</b>をタップ</span></li>
+   <li><b class="m">2</b><span>「この端末で通知を受け取る」を押す</span></li>
+  </ol>
+  <div style="margin-top:14px" class="dlg"><p><b>"チームToDo"は通知を送信します。よろしいですか？</b>通知方法は…</p><div class="bt"><span>許可しない</span><span>許可</span></div></div>
+  <p class="cap" style="margin-top:8px">確認が出たら <b>「許可」</b></p>
+  <div class="warn">⚠ ここを「許可しない」にすると、期限切れの通知が届きません。</div>
+ </div>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+ <h2><span class="n">4</span>画面の見方</h2>
+ <div class="card">
+  <img class="shot p" src="manual/list-p.jpg" alt="一覧（縦）">
+  <ol class="k">
+   <li><b class="m">1</b><span>今のチーム名（押すと切り替え）</span></li>
+   <li><b class="m">2</b><span>表示の切り替え：<b>今日</b>／<b>自分</b>（自分の担当・確認）／<b>確認待ち</b>／<b>すべて</b>　赤い数字は要対応の件数</span></li>
+   <li><b class="m">3</b><span>タスクを追加</span></li>
+  </ol>
+ </div>
+ <div class="card">
+  <p class="lead">📱 <b>横向き</b>にすると、1行で全部見えて便利です（画面の回転ロックをオフに）</p>
+  <img class="shot" src="manual/list-l.jpg" alt="一覧（横）">
+  <ol class="k">
+   <li><b class="m">1</b><span>チェック欄（押すと完了）</span></li>
+   <li><b class="m">2</b><span>期限　<span style="background:#fde4e4;padding:0 4px;border-radius:4px">赤</span>＝期限切れ　<span style="background:#fdf0dc;padding:0 4px;border-radius:4px">オレンジ</span>＝1時間以内</span></li>
+   <li><b class="m">3</b><span>担当者と確認者（自分は青色）</span></li>
+  </ol>
+  <img class="shot" style="margin-top:12px" src="manual/future.jpg" alt="先の予定">
+  <p style="font-size:14px;margin-top:8px"><b class="m" style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;align-items:center;justify-content:center">1</b> 今日以外のタスクは <b>日付</b> と <b style="color:var(--main)">あと○日</b> で表示されます。</p>
+ </div>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+ <h2><span class="n">5</span>タスクを追加する</h2>
+ <div class="card">
+  <p class="lead">右下の <b style="display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--main);color:#fff;align-items:center;justify-content:center">＋</b> を押して、<b>タップで選ぶだけ</b>。</p>
+  <img class="shot p" src="manual/add.jpg" alt="追加画面">
+  <ol class="k">
+   <li><b class="m">1</b><span>概要（やること）を入力</span></li>
+   <li><b class="m">2</b><span>担当者（やる人）</span></li>
+   <li><b class="m">3</b><span>確認者（チェックする人）</span></li>
+   <li><b class="m">4</b><span>期限日</span></li>
+   <li><b class="m">5</b><span>警告までの時間：<b>30分後／1時間後／3時間後</b>に赤い警告。警告がいらなければ<b>「不要」</b></span></li>
+   <li><b class="m">6</b><span>最後に「保存」</span></li>
+  </ol>
+ </div>
+ <div class="card">
+  <img class="shot p" src="manual/add2.jpg" alt="繰り返し・メモ">
+  <ol class="k">
+   <li><b class="m">1</b><span>繰り返し：毎日・平日・毎週・毎月のタスクは、完了すると<b>次回分が自動で作られます</b>（その日になるまで表示されません）</span></li>
+   <li><b class="m">2</b><span>詳細メモ：手順や保存場所など</span></li>
+  </ol>
+  <div class="tip">💡 作ったタスクをタップすると、あとから変更・削除できます。</div>
+ </div>
+</section>
+
+<!-- 6 -->
+<section id="s6">
+ <h2><span class="n">6</span>終わったらチェック</h2>
+ <div class="card">
+  <p class="lead">チェック欄を押すと、タスクが<b>下の「完了」へ移動</b>します。</p>
+  <img class="shot" src="manual/done.jpg" alt="完了">
+  <p style="font-size:14px;margin-top:8px">今日のタスクが全部終わると 🎉 が出ます。間違えたら、もう一度押すと元に戻せます。</p>
+ </div>
+</section>
+
+<!-- 7 -->
+<section id="s7">
+ <h2><span class="n">7</span>赤い警告が出たら</h2>
+ <div class="card">
+  <p class="lead">警告の時間を過ぎると…</p>
+  <div class="lock"><div class="t">10:06</div>
+   <div class="noti"><img src="icon-192.png" alt=""><div><b>⚠ 期限超過：朝礼資料の更新</b>10:06期限（5分超過）／担当 岩田・確認 松本</div></div>
+  </div>
+  <p class="cap" style="margin-top:8px">アプリを閉じていても <b>通知</b> が届きます（完了するまで30分ごと）</p>
+  <img class="shot" style="margin-top:14px" src="manual/alert-m.jpg" alt="赤い警告画面">
+  <p class="cap" style="margin-top:6px">アプリを開くと <b>画面全体が赤く</b> なります</p>
+  <ol class="k">
+   <li><b class="m">1</b><span>終わったら「完了✓」</span></li>
+   <li><b class="m">2</b><span>まだなら「10分後にもう一度」（10分後に再び赤くなります）</span></li>
+  </ol>
+ </div>
+</section>
+
+<!-- 8 -->
+<section id="s8">
+ <h2><span class="n">8</span>確認者の操作</h2>
+ <div class="card">
+  <p class="lead">担当者が完了すると、<b>確認者に通知</b>が届きます。</p>
+  <div class="noti"><img src="icon-192.png" alt=""><div><b>✅ 確認依頼：在庫差異の報告</b>宮川さんが完了しました。確認をお願いします</div></div>
+  <img class="shot" style="margin-top:14px" src="manual/check.jpg" alt="確認待ち">
+  <ol class="k">
+   <li><b class="m">1</b><span>「確認待ち」タブを開く</span></li>
+   <li><b class="m">2</b><span>内容を確かめて「確認OK」</span></li>
+  </ol>
+ </div>
+</section>
+
+<!-- 9 -->
+<section id="s9">
+ <h2><span class="n">9</span>メンバー招待・チーム切り替え</h2>
+ <div class="card">
+  <p class="lead">⚙（設定）から、新しいメンバーに招待リンクを送れます。</p>
+  <img class="shot" src="manual/invite.jpg" alt="招待">
+  <ol class="k"><li><b class="m">1</b><span>「招待リンクを送る」→ LINEなどで送信</span></li></ol>
+ </div>
+ <div class="card">
+  <p class="lead">いくつかのチームに入っている場合は、左上のチーム名から切り替えます。</p>
+  <img class="shot" src="manual/team.jpg" alt="チーム切り替え">
+  <ol class="k">
+   <li><b class="m">1</b><span>チームを押すと切り替わる</span></li>
+   <li><b class="m">2</b><span>別のチームを作る・参加する</span></li>
+  </ol>
+ </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+ <h2><span class="n">？</span>困ったとき</h2>
+ <details><summary>通知が届かない</summary><p>① ホーム画面のアイコンから開いているか（iPhoneはSafariのままでは通知できません）<br>② ⚙設定で自分の名前を選び、「通知を受け取る」を押したか<br>③ スマホの「設定 → 通知 → チームToDo」で許可になっているか<br>※通知は1〜2分ほど遅れることがあります。</p></details>
+ <details><summary>画面が横向きにならない</summary><p>コントロールセンターの「画面縦向きのロック」🔒をオフにしてください。縦向きでも使えます。</p></details>
+ <details><summary>上にオレンジ色の帯が出ている</summary><p>電波の弱い場所では一時的に出ることがあります。電波の良い場所で開き直してください。直らない場合は管理者に連絡してください。</p></details>
+ <details><summary>他の人の追加・完了が反映されない</summary><p>通常は数秒で全員の画面に反映されます。アプリを一度閉じて開き直してください。</p></details>
+ <details><summary>間違えて完了にした</summary><p>もう一度チェック欄を押すと未完了に戻ります。</p></details>
+ <details><summary>機種変更した・名前を間違えた</summary><p>新しいスマホで招待リンクから参加し直し、⚙設定で名前を選んでください。データはチームに残っています。</p></details>
+ <a class="go" href="./">チームToDoを開く</a>
+</section>
+<footer>チームToDo 使い方ガイド</footer>
+</main>
+<script>
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.os').forEach(x=>x.classList.toggle('on',x.id===b.dataset.os));
+});
+if(/Android/.test(navigator.userAgent)) document.querySelector('[data-os="and"]').click();
+</script>
+</body>
+</html>

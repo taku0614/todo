@@ -115,7 +115,7 @@ textarea.in{min-height:56px;resize:vertical}
 .btn.gray{background:#eef1f6;color:var(--ink)}
 .mem{display:flex;gap:6px;margin-bottom:6px}
 .mem .in{padding:8px 10px}
-.mem button{padding:0 12px;border-radius:9px;background:var(--bad2);color:var(--bad);font-weight:700}
+.mem button{padding:0 12px;white-space:nowrap;flex:none;border-radius:9px;background:var(--bad2);color:var(--bad);font-weight:700}
 /* setup */
 #setup{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;overflow:auto;padding:calc(20px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) 20px calc(20px + env(safe-area-inset-left))}
 #setup.show{display:block}
@@ -224,6 +224,7 @@ textarea.in{min-height:56px;resize:vertical}
     <p style="margin-top:6px;word-break:break-all" id="sLink"></p></div>
    <div class="card"><h4>メンバー</h4><div id="sMem"></div>
     <div class="mem"><input class="in" id="sNew" placeholder="名前を追加" maxlength="12"><button style="background:var(--main2);color:#1a4fae" id="sAdd">追加</button></div></div>
+   <div class="card"><h4>📖 使い方ガイド</h4><p>はじめての人向けの説明書です。</p><div style="margin-top:8px"><a class="btn sub" href="manual.html" style="text-decoration:none">ガイドを開く</a></div></div>
    <div class="card"><h4>チーム</h4><p id="sTeam"></p><div style="margin-top:8px"><button class="btn gray" id="sLeave">チームを切り替える</button></div></div>
   </div>
  </div></div>
@@ -584,7 +585,7 @@ function openSettings(force){
 $('#sMem').addEventListener('change', e=>{ const i=e.target.dataset.i; if(i==null) return; const v=e.target.value.trim(); if(!v) return; const mem=[...teamData.members]; const old=mem[i]; mem[i]=v; store.setTeam({members:mem}); if(me===old){me=v;saveMe();} });
 $('#sMem').addEventListener('click', e=>{ const i=e.target.dataset.rm; if(i==null) return; const mem=[...teamData.members]; if(!confirm(`${mem[i]} さんをメンバーから外しますか？（タスクは残ります）`)) return; mem.splice(i,1); store.setTeam({members:mem}).then(()=>openSettings()); });
 $('#sAdd').onclick=()=>{ const v=$('#sNew').value.trim(); if(!v) return; const mem=[...(teamData.members||[])]; if(mem.includes(v)){toast('同じ名前がいます');return;} mem.push(v); $('#sNew').value=''; store.setTeam({members:mem}).then(()=>openSettings()); };
-$('#sShare').onclick=async()=>{ const url=inviteUrl(); if(navigator.share){ try{ await navigator.share({title:'チームToDo',text:`「${teamData.name||'チームToDo'}」に参加してください`,url}); return; }catch(e){ if(e.name==='AbortError') return; } } copy(url); };
+$('#sShare').onclick=async()=>{ const url=inviteUrl(); if(navigator.share){ try{ await navigator.share({title:'チームToDo',text:`「${teamData.name||'チームToDo'}」に参加してください。\n使い方：${location.origin+location.pathname.replace(/[^/]*$/,'')}manual.html\n参加リンク：`,url}); return; }catch(e){ if(e.name==='AbortError') return; } } copy(url); };
 $('#sCopy').onclick=()=>copy(inviteUrl());
 async function copy(s){ try{ await navigator.clipboard.writeText(s); toast('コピーしました'); }catch(e){ prompt('コピーしてください',s); } }
 $('#sLeave').onclick=()=>{ closeOv(); openTeams(); };
