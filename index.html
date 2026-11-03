@@ -331,6 +331,7 @@ async function fbStore(teamId){
 async function start(){
   const u = new URL(location.href);
   const q = u.searchParams.get('t');
+  const fq = u.searchParams.get('f'); if(['today','mine','check','all'].includes(fq)){ filter=fq; LS.set('filter',filter); u.searchParams.delete('f'); history.replaceState(null,'',u.pathname+(u.search||'')+u.hash); }
   if(q && q!==team){ team=q; LS.set('team',team); }
   if(q){ u.searchParams.delete('t'); history.replaceState(null,'',u.pathname+(u.search||'')+u.hash); }
   if(demo) showBanner('デモモード：この端末だけで動作中（config.js にFirebase設定を入れると5人で共有されます）');
@@ -343,7 +344,7 @@ async function connect(){
   catch(e){ console.error(e); showBanner('Firebaseに接続できません。config.js と通信を確認してください'); return; }
   $('#setup').classList.remove('show');
   unsubs.push(store.watchTeam(d=>{ teamData=d||{name:'',members:[]}; if(!teamData.members) teamData.members=[]; render(); if(!me || !teamData.members.includes(me)) { if(teamData.members.length) openSettings(true); } }));
-  unsubs.push(store.watchTasks(Date.now()-7*864e5, arr=>{ tasks=arr; render(); checkAlert(); }));
+  unsubs.push(store.watchTasks(Date.now()-7*864e5, arr=>{ notifyDone(arr); tasks=arr; render(); checkAlert(); }));
   syncPush();
 }
 
@@ -420,13 +421,26 @@ $('#list').addEventListener('click', e=>{
 });
 $('#seg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return; filter=b.dataset.f; LS.set('filter',filter); render(); window.scrollTo(0,0); });
 
+/* ---------- 完了をアプリ内でも知らせる（確認者向け） ---------- */
+const openedAt = Date.now(); const seenDone = new Set();
+function notifyDone(arr){
+  for(const t of arr){
+    if(!t.done || seenDone.has(t.id)) continue; seenDone.add(t.id);
+    if(me && t.checker===me && t.doneBy!==me && !t.checked && t.doneAt>openedAt){
+      toast(`✅ ${t.doneBy||'担当者'}さんが「${t.title}」を完了。確認してください`);
+      if(navigator.vibrate) navigator.vibrate([60,60,60]);
+    }
+  }
+}
+
 /* ---------- 完了・確認 ---------- */
 async function toggleDone(t,row){
   if(navigator.vibrate) navigator.vibrate(15);
   if(!t.done){
     row && row.classList.add('leaving');
     await new Promise(r=>setTimeout(r,280));
-    await store.put(t.id,{done:true,doneAt:Date.now(),doneBy:me||''});
+    // doneNotified:false → 5分ごとの見回りで確認者にプッシュ通知（自分で自分を確認する場合は通知しない）
+    await store.put(t.id,{done:true,doneAt:Date.now(),doneBy:me||'',doneNotified: !!me && me===t.checker});
     // 繰り返し：次回分を自動作成（同じIDなので二重作成されない）
     if(t.repeat && t.repeat!=='none'){
       let nd = nextDate(t.date,t.repeat); const td=todayStr();

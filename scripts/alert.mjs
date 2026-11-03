@@ -49,4 +49,28 @@ for (const tref of teams) {
     await d.ref.update({ lastAlertAt: now, alertCount: admin.firestore.FieldValue.increment(1) });
   }
 }
+// ===== 完了通知：担当者が完了したら確認者へ =====
+for (const tref of teams) {
+  const snap = await tref.collection('tasks').where('doneNotified', '==', false).get();
+  const list = snap.docs.filter(d => { const t = d.data(); return t.done && !t.checked; });
+  if (!list.length) { await Promise.all(snap.docs.map(d => d.ref.update({ doneNotified: true }))); continue; }
+  const subs = (await tref.collection('subs').get()).docs;
+  for (const d of snap.docs) {
+    const t = d.data();
+    if (t.done && !t.checked) {
+      const targets = subs.filter(s => s.data().member === t.checker);
+      const payload = JSON.stringify({
+        title: `✅ 確認依頼：${t.title}`,
+        body: `${t.doneBy || '担当者'}さんが完了しました。確認をお願いします`,
+        tag: 'done-' + d.id, url: './?f=check', count: 1
+      });
+      await Promise.all(targets.map(s => { const sd = s.data();
+        return webpush.sendNotification({ endpoint: sd.endpoint, keys: sd.keys }, payload, { TTL: 86400, urgency: 'normal' })
+          .then(() => { sent++; })
+          .catch(e => { if (e.statusCode === 404 || e.statusCode === 410) return s.ref.delete(); console.error('push失敗', e.statusCode, e.body); });
+      }));
+    }
+    await d.ref.update({ doneNotified: true });
+  }
+}
 console.log(`${today} 通知送信 ${sent} 件`);
