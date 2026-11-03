@@ -1,7 +1,7 @@
 name: 期限超過アラート
 on:
   schedule:
-    - cron: '*/5 * * * *'   # 5分ごと（GitHubの混雑で数分遅れることがあります）
+    - cron: '*/5 * * * *'   # 5分ごとに起動し、1回の起動で15分間・1分おきに見回る（次の起動が待機するので途切れない）
   workflow_dispatch:        # 手動実行（テスト用）
 permissions:
   contents: write
@@ -11,9 +11,19 @@ concurrency:
 jobs:
   alert:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      # GitHubは60日間更新のないリポジトリの定期実行を止めるため、毎月1日に空コミットして延命
+      - name: keepalive
+        if: github.event_name == 'schedule'
+        run: |
+          if [ "$(date -u +%d%H)" = "0100" ] && [ "$(date -u +%M)" -lt 5 ]; then
+            git config user.name "keepalive-bot"
+            git config user.email "keepalive@users.noreply.github.com"
+            git commit --allow-empty -m "keepalive"
+            git push
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -26,13 +36,4 @@ jobs:
           VAPID_PUBLIC: ${{ secrets.VAPID_PUBLIC }}
           VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
           REALERT_MIN: '30'
-      # GitHubは60日間更新のないリポジトリの定期実行を止めるため、毎月1日に空コミットして延命
-      - name: keepalive
-        if: github.event_name == 'schedule'
-        run: |
-          if [ "$(date -u +%d%H)" = "0100" ] && [ "$(date -u +%M)" -lt 5 ]; then
-            git config user.name "keepalive-bot"
-            git config user.email "keepalive@users.noreply.github.com"
-            git commit --allow-empty -m "keepalive"
-            git push
-          fi
+          LOOP_MIN: ${{ github.event_name == 'schedule' && '15' || '1' }}

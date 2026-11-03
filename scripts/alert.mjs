@@ -11,10 +11,11 @@ const key = (k, min) => { const m = env(k).match(new RegExp(`[A-Za-z0-9_-]{${min
 webpush.setVapidDetails('mailto:' + (process.env.VAPID_SUBJECT || 'todo@example.com'), key('VAPID_PUBLIC', 80), key('VAPID_PRIVATE', 40));
 const db = admin.firestore();
 
-const now = Date.now();
-const today = new Date(now + 9 * 3600e3).toISOString().slice(0, 10); // 日本時間の今日
 const INTERVAL = (Number(process.env.REALERT_MIN) || 30) * 60e3;
 
+async function tick() {
+const now = Date.now();
+const today = new Date(now + 9 * 3600e3).toISOString().slice(0, 10); // 日本時間の今日
 let sent = 0;
 const teams = await db.collection('teams').listDocuments();
 for (const tref of teams) {
@@ -74,3 +75,16 @@ for (const tref of teams) {
   }
 }
 console.log(`${today} 通知送信 ${sent} 件`);
+}
+
+// 1回の起動で LOOP_MIN 分間、1分ごとに見回る（GitHubの定期実行は最短5分のため）
+const LOOP_MIN = Number(process.env.LOOP_MIN) || 1;
+const end = Date.now() + LOOP_MIN * 60e3;
+do {
+  const t0 = Date.now();
+  try { await tick(); } catch (e) { console.error('見回りエラー', e.message); }
+  const wait = 60e3 - (Date.now() - t0);
+  if (Date.now() + wait >= end) break;
+  await new Promise(r => setTimeout(r, Math.max(wait, 1000)));
+} while (true);
+process.exit(0);
